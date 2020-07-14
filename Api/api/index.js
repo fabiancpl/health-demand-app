@@ -1,3 +1,5 @@
+'use strict';
+
 const rlcpd = require('./rlcpd.js');
 
 module.exports = app => {

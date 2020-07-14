@@ -1,3 +1,5 @@
+'use strict';
+
 const db = require('../database.js');
 module.exports = (app, ruta) => {
     app.route(ruta)

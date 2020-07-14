@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports.useMiddleware = app => {
     const cors = require('cors');
     const bodyParser = require('body-parser');

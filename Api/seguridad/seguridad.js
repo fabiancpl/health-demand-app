@@ -1,3 +1,5 @@
+'use strict';
+
 /** Módulos de ayuda */
 const jwt = require('./jwt');
 /**

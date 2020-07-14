@@ -1,3 +1,5 @@
+'use strict';
+
 /** librería de encriptado */
 const jwt = require('jsonwebtoken')
 const randtoken = require('rand-token')

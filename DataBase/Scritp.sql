@@ -1,3 +1,10 @@
+create database ds4a_team61;
+
+create user team61_user with encrypted password 'ds4at34m61';
+
+grant all privileges on database ds4a_team61 to team61_user;
+
+
 drop table TB_RUV;
 
 /*==============================================================*/
@@ -5,8 +12,8 @@ drop table TB_RUV;
 /*==============================================================*/
 create table TB_RUV (
    PERSONAID            VARCHAR(16)          not null,
-   SEXO                 VARCHAR(16)          null,
-   ETNIA                VARCHAR(32)          null,
+   SEXO                 VARCHAR(32)          null,
+   ETNIA                VARCHAR(128)          null,
    INDDISCAPACIDAD      VARCHAR(2)           null,
    FECHANACIMIENTO      DATE                 null,
    HECHO                VARCHAR(128)         null,
@@ -125,7 +132,7 @@ create table TB_RIPS (
    PERSONAID            VARCHAR(16)          null,
    TIPOATENCION         VARCHAR(128)         null,
    CAPITULODX           VARCHAR(128)         null,
-   DIAGNOSTICOPRINCIPAL VARCHAR(128)         null,
+   DIAGNOSTICOPRINCIPAL VARCHAR(255)         null,
    EDADATENCION         INT4                 null,
    SEXO                 VARCHAR(16)          null,
    FECHAATENCION        DATE                 null,
@@ -134,7 +141,7 @@ create table TB_RIPS (
    CAUSAEXTERNA         VARCHAR(128)         null,
    CODIGOPRESTADOR      VARCHAR(128)         null,
    PRESTADOR            VARCHAR(128)         null,
-   PROCEDIMIENTO        VARCHAR(128)         null,
+   PROCEDIMIENTO        VARCHAR(512)         null,
    DPTOIDATENCION       VARCHAR(128)         null,
    DPTOATENCION         VARCHAR(128)         null,
    MPIOIDATENCION       VARCHAR(128)         null,
