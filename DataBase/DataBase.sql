@@ -104,22 +104,22 @@ create table TB_RIPS (
    PERSONAID            VARCHAR(16)          null,
    TIPOATENCION         VARCHAR(128)         null,
    CAPITULODX           VARCHAR(128)         null,
-   DIAGNOSTICOPRINCIPAL VARCHAR(128)         null,
-   EDADATENCION         VARCHAR(16)          null,
+   DIAGNOSTICOPRINCIPAL VARCHAR(255)         null,
+   EDADATENCION         VARCHAR(16)         null,
    SEXO                 VARCHAR(16)          null,
-   FECHAATENCION        DATE                 null,
-   FECHAATENCION_STR    VARCHAR(128)         null,
+   FECHAATENCION        DATE                null,
+   FECHAATENCION_str    VARCHAR(128)                 null,
    FINALIDADCONSULTA    VARCHAR(128)         null,
    FINALIDADPROCEDIMIENTO VARCHAR(128)         null,
    CAUSAEXTERNA         VARCHAR(128)         null,
    CODIGOPRESTADOR      VARCHAR(128)         null,
    PRESTADOR            VARCHAR(128)         null,
-   PROCEDIMIENTO        VARCHAR(128)         null,
+   PROCEDIMIENTO        VARCHAR(512)         null,
    DPTOIDATENCION       VARCHAR(128)         null,
    DPTOATENCION         VARCHAR(128)         null,
    MPIOIDATENCION       VARCHAR(128)         null,
    MPIOATENCION         VARCHAR(128)         null,
-   NUMEROATENCIONES     VARCHAR(16)                 null
+   NUMEROATENCIONES     VARCHAR(16)                null
 );
 
 comment on table TB_RIPS is

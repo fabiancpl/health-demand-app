@@ -16,6 +16,7 @@ create table TB_RUV (
    ETNIA                VARCHAR(128)          null,
    INDDISCAPACIDAD      VARCHAR(2)           null,
    FECHANACIMIENTO      DATE                 null,
+   FECHANACIMIENTO_STR  VARCHAR(128)                 null,
    HECHO                VARCHAR(128)         null,
    DEPARTAMENTOIDRESIDENCIA VARCHAR(128)         null,
    DEPARTAMENTORESIDENCIA VARCHAR(128)         null,
@@ -26,8 +27,7 @@ create table TB_RUV (
    MUNCIPIOIDOCURRENCIA VARCHAR(128)         null,
    MUNCIPIOOCURRENCIA   VARCHAR(128)         null,
    SUJETODESC           VARCHAR(128)         null,
-   ZONAOCURRENCIA       VARCHAR(128)         null,
-   constraint PK_TB_RUV primary key (PERSONAID)
+   ZONAOCURRENCIA       VARCHAR(128)         null
 );
 
 comment on table TB_RUV is
@@ -129,24 +129,25 @@ drop table TB_RIPS;
 /* Table: TB_RIPS                                               */
 /*==============================================================*/
 create table TB_RIPS (
-   PERSONAID            VARCHAR(16)          null,
-   TIPOATENCION         VARCHAR(128)         null,
-   CAPITULODX           VARCHAR(128)         null,
-   DIAGNOSTICOPRINCIPAL VARCHAR(255)         null,
-   EDADATENCION         INT4                 null,
-   SEXO                 VARCHAR(16)          null,
-   FECHAATENCION        DATE                 null,
-   FINALIDADCONSULTA    VARCHAR(128)         null,
+   PERSONAID              VARCHAR(16)          null,
+   TIPOATENCION           VARCHAR(128)         null,
+   CAPITULODX             VARCHAR(128)         null,
+   DIAGNOSTICOPRINCIPAL   VARCHAR(255)         null,
+   EDADATENCION           VARCHAR(16)          null,
+   SEXO                   VARCHAR(16)          null,
+   FECHAATENCION          DATE                 null,
+   FECHAATENCION_STR      VARCHAR(128)         null,
+   FINALIDADCONSULTA      VARCHAR(128)         null,
    FINALIDADPROCEDIMIENTO VARCHAR(128)         null,
-   CAUSAEXTERNA         VARCHAR(128)         null,
-   CODIGOPRESTADOR      VARCHAR(128)         null,
-   PRESTADOR            VARCHAR(128)         null,
-   PROCEDIMIENTO        VARCHAR(512)         null,
-   DPTOIDATENCION       VARCHAR(128)         null,
-   DPTOATENCION         VARCHAR(128)         null,
-   MPIOIDATENCION       VARCHAR(128)         null,
-   MPIOATENCION         VARCHAR(128)         null,
-   NUMEROATENCIONES     INT4                 null
+   CAUSAEXTERNA           VARCHAR(128)         null,
+   CODIGOPRESTADOR        VARCHAR(128)         null,
+   PRESTADOR              VARCHAR(128)         null,
+   PROCEDIMIENTO          VARCHAR(512)         null,
+   DPTOIDATENCION         VARCHAR(128)         null,
+   DPTOATENCION           VARCHAR(128)         null,
+   MPIOIDATENCION         VARCHAR(128)         null,
+   MPIOATENCION           VARCHAR(128)         null,
+   NUMEROATENCIONES       VARCHAR(16)          null
 );
 
 comment on table TB_RIPS is
@@ -156,3 +157,108 @@ alter table TB_RIPS
    add constraint FK_TB_RIPS_REFERENCE_TB_RUV foreign key (PERSONAID)
       references TB_RUV (PERSONAID)
       on delete restrict on update restrict;
+
+CREATE INDEX tb_rips_sexo ON tb_rips (sexo);
+CREATE INDEX tb_rips_dptoatencion ON tb_rips (dptoatencion);
+
+
+/* ------------------------- TABLAS AGREGADAS --------------------------------- */
+
+drop table tb_ruv_agg;
+
+/*==============================================================*/
+/* Table: tb_ruv_agg                                            */
+/*==============================================================*/
+CREATE TABLE tb_ruv_agg (
+  Ind BIGINT,
+  IndDiscapacidad VARCHAR(128),
+  IndAdultoMayor VARCHAR(128),
+  IndEtnia VARCHAR(128),
+  IndFallecido VARCHAR(128),
+  IndVictima VARCHAR(128),
+  Sexo VARCHAR(128),
+  Etnia VARCHAR(128),
+  Hecho VARCHAR(128),
+  CodDepOcur varchar(16),
+  DepartamentoOcurrencia VARCHAR(128),
+  CodMunOcur varchar(16),
+  MuncipioOcurrencia VARCHAR(128),
+  SujetoDesc VARCHAR(128),
+  ZonaOcurrencia VARCHAR(32),
+  probableManeraMuerte VARCHAR(128),
+  probableManeraMuerteviolenta VARCHAR(128),
+  TipoAlteracion VARCHAR(128),
+  OrigenDiscapacidad VARCHAR(128),
+  TipoRegimen VARCHAR(32),
+  EstadoAfiliacion VARCHAR(32),
+  TipoAfiliado VARCHAR(24),
+  GrupoEdad VARCHAR(8),
+  IndMuestra VARCHAR(8),
+  n BIGINT
+);
+
+comment on table tb_ruv_agg is
+'Contiene información agregada sobre víctimas registradas, datos de ubicación de la víctima, categoría del acto de victimización, entre otros.';
+
+create index tb_ruv_agg_sexo on tb_ruv_agg (sexo);
+
+create index tb_ruv_agg_departamentoocurrencia on tb_ruv_agg (departamentoocurrencia)
+
+create index tb_ruv_agg_coddepocur on tb_ruv_agg (coddepocur)
+
+
+drop table tb_rips_agg;
+
+/*==============================================================*/
+/* Table: tb_rips_agg                                           */
+/*==============================================================*/
+CREATE TABLE tb_rips_agg (
+  Ind BIGINT,
+  PersonaID VARCHAR(128),
+  TipoAtencion VARCHAR(128),
+  CapituloDX VARCHAR(128),
+  anoAtencion VARCHAR(4),
+  n VARCHAR(16),
+  IndDiscapacidad VARCHAR(128),
+  IndAdultoMayor VARCHAR(128),
+  IndEtnia VARCHAR(128),
+  IndFallecido VARCHAR(128),
+  IndVictima VARCHAR(128),
+  Sexo VARCHAR(128),
+  Etnia VARCHAR(128),
+  Hecho VARCHAR(128),
+  CodDepOcur varchar(16),
+  DepartamentoOcurrencia VARCHAR(128),
+  CodMunOcur varchar(16),
+  MuncipioOcurrencia VARCHAR(128),
+  SujetoDesc VARCHAR(128),
+  ZonaOcurrencia VARCHAR(32),
+  probableManeraMuerte VARCHAR(128),
+  probableManeraMuerteviolenta VARCHAR(128),
+  TipoAlteracion VARCHAR(128),
+  OrigenDiscapacidad VARCHAR(128),
+  TipoRegimen VARCHAR(32),
+  EstadoAfiliacion VARCHAR(32),
+  TipoAfiliado VARCHAR(24),
+  GrupoEdad VARCHAR(8),
+  IndMuestra varchar(8),
+  CodDptoAtencion VARCHAR(16),
+  DepartamentoAtencion VARCHAR(128),
+  CodMunAtencion VARCHAR(16),
+  MunicipioAtencion VARCHAR(128)
+);
+
+comment on table tb_rips_agg is
+'Contiene información agregada sobre la atención médica realizada';
+
+CREATE TABLE tb_rips_agg_mesanno (
+  TipoAtencion VARCHAR(128),
+  anoAtencion VARCHAR(4),
+  mesAtencion VARCHAR(2),
+  CodDptoAtencion VARCHAR(16),
+  DepartamentoAtencion VARCHAR(128),
+  n BIGINT
+);
+
+comment on table tb_rips_agg is
+'Contiene información agregada sobre la atención médica realizada agrupada por tipo atencion, ano, mes y departamento';
