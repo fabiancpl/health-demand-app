@@ -162,9 +162,56 @@ CREATE INDEX tb_rips_sexo ON tb_rips (sexo);
 CREATE INDEX tb_rips_dptoatencion ON tb_rips (dptoatencion);
 
 
+/* ------------------------- TABLAS MODELOS --------------------------------- */
+
+drop table if exists tb_modelos;
+
+
+/*==============================================================*/
+/* Table: tb_modelos                                            */
+/*==============================================================*/
+CREATE TABLE tb_modelos (
+  Ind BIGINT,
+  PersonaID BIGINT,
+  Cerebro BIGINT,
+  Diabetes BIGINT,
+  Hipertension BIGINT,
+  Infarto BIGINT,
+  Mental BIGINT,
+  Tumor BIGINT,
+  Sexo VARCHAR(128),
+  Etnia VARCHAR(128),
+  IndDiscapacidad VARCHAR(128),
+  IndAdultoMayor VARCHAR(128),
+  IndEtnia VARCHAR(128),
+  FechaNacimiento DATE,
+  Hecho VARCHAR(128),
+  DepartamentoOcurrencia VARCHAR(128),
+  MuncipioOcurrencia VARCHAR(128),
+  SujetoDesc VARCHAR(128),
+  probableManeraMuerteviolenta VARCHAR(128),
+  probableManeraMuerte VARCHAR(128),
+  TipoAlteracion VARCHAR(128),
+  OrigenDiscapacidad VARCHAR(128),
+  TipoRegimen VARCHAR(32),
+  Edad BIGINT,
+  GrupoEdad VARCHAR(8),
+  CicloVida VARCHAR(32),
+  Total DOUBLE PRECISION,
+  CONSULTAS DOUBLE PRECISION,
+  HOSPITALIZACIONES DOUBLE PRECISION,
+  PROCEDIMIENTOS_DE_SALUD DOUBLE PRECISION,
+  URGENCIAS DOUBLE PRECISION,
+  Region VARCHAR(32)
+);
+
+comment on table tb_ruv_agg is
+'Contiene información requerida para la construcción de los modelos.';
+
+
 /* ------------------------- TABLAS AGREGADAS --------------------------------- */
 
-drop table tb_ruv_agg;
+drop table if exists tb_ruv_agg;
 
 /*==============================================================*/
 /* Table: tb_ruv_agg                                            */
@@ -206,13 +253,22 @@ create index tb_ruv_agg_departamentoocurrencia on tb_ruv_agg (departamentoocurre
 
 create index tb_ruv_agg_coddepocur on tb_ruv_agg (coddepocur)
 
+drop MATERIALIZED VIEW vm_ruv_agg;
+
+create MATERIALIZED VIEW vm_ruv_agg
+as
+select trim(r.coddepocur) "CodigoDepartamento", trim(r.departamentoocurrencia) as "Departamento", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n) as "Total"
+from tb_ruv_agg r 
+where coddepocur not in ('00','NA')
+group by r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion 
+order by r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
 
 drop table tb_rips_agg;
 
 /*==============================================================*/
 /* Table: tb_rips_agg                                           */
 /*==============================================================*/
-CREATE TABLE tb_rips_agg (
+CREATE TABLE if exists tb_rips_agg (
   Ind BIGINT,
   PersonaID VARCHAR(128),
   TipoAtencion VARCHAR(128),
@@ -251,6 +307,24 @@ CREATE TABLE tb_rips_agg (
 comment on table tb_rips_agg is
 'Contiene información agregada sobre la atención médica realizada';
 
+
+drop MATERIALIZED VIEW vm_rips_agg;
+
+create MATERIALIZED VIEW vm_rips_agg
+as
+select trim(r.coddptoatencion) "CodigoDepartamento", trim(r.departamentoatencion) "Departamento", r.tipoatencion "TipoAtencion", r.capitulodx "CapituloDX", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n::int) as "Total"
+from tb_rips_agg r
+where n <> 'NA'
+and coddptoatencion not in ('00','NA')
+group by r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.capitulodx, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
+order by r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.capitulodx, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
+
+
+drop table if exists tb_rips_agg_mesanno;
+
+/*==============================================================*/
+/* Table: tb_rips_agg_mesanno                                           */
+/*==============================================================*/
 CREATE TABLE tb_rips_agg_mesanno (
   TipoAtencion VARCHAR(128),
   anoAtencion VARCHAR(4),
