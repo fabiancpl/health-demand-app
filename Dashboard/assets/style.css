@@ -149,7 +149,7 @@ p {
 /*----------------------------------------------------------------------------*/
 
 /* Tabs */
-#Dashboard-tab.custom-tab, #Model-tab.custom-tab {
+#Dashboard-tab.custom-tab,#Dashboard-tab2.custom-tab, #Model-tab.custom-tab {
   letter-spacing: 1px;
   color: inherit;
   border: 0;

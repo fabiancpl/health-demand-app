@@ -11,7 +11,7 @@ import plotly.express as px
 # Dash Bootstrap Components
 import dash_bootstrap_components as dbc 
 
-#Data 
+# Data libraries
 import math
 import numpy as np
 import datetime as dt
@@ -22,17 +22,70 @@ import urllib.request, json
 from app import app
 from lib import colombia_map,rips_charts
 
-# Build Functions
+#### delete after integration
+data = [{"x": 23,"y":"CARIES DE LA DENTINA"},{    "x": 114,     "y": "HIPERTENSION"  },   {    "x": 630,     "y": "GASTRITIS"  },   {    "x": 720,     "y": "VAGINITIS"  },   {    "x": 530,     "y": "GINGIVITIS"  },   {    "x": 400,     "y": "LUMBAGO"  },   {    "x": 305,     "y": "INFECCION URINARIA"  },   {    "x": 213,     "y": "CEFALEA"  },   {    "x": 810,     "y": "DOLOR PELVICO"  }]
+df_diseases = pd.DataFrame.from_dict(data, orient='columns')
+df_diseases.sort_values(by=[df_diseases.columns[0]],inplace=True)
+
+RIPS = pd.read_csv("./data/RIPS.txt", sep=";", nrows=1000000)
+RIPS['FechaAtencion'] = pd.to_datetime(RIPS['FechaAtencion'], format='%Y%m%d')
+RIPS['Year'] = pd.DatetimeIndex(RIPS.FechaAtencion).year
+
+# IndDiscapacidad
+# IndAdultoMayor
+# IndEtnia
+# IndVictima	
+
+
+# Endpoionts functions
 
 def get_df_from_url(url_in,sort_index=0):
     with urllib.request.urlopen(url_in) as url:
         data = json.loads(url.read().decode())
     df=pd.json_normalize(data)
     df.sort_values(by=[df.columns[sort_index]],inplace=True)
+    df.Total = pd.to_numeric(df.Total)
     return  df
 
-def get_diseases():
-    return get_df_from_url("http://127.0.0.1:5000/diseases",0)
+def get_data_summary():
+    try:
+        return get_df_from_url("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",0)
+    except:
+        with open('./data/ruv.json') as f:
+            data = json.load(f)
+            df = pd.DataFrame.from_dict(data, orient='columns')
+            df.Total = pd.to_numeric(df.Total)
+        return df
+    
+
+
+
+# Data
+df_data = get_data_summary()
+df_data_tmp = df_data.copy()
+
+
+def total_vic(df):
+    return df.Total.astype(int).sum()
+
+def get_Etnia(df):
+    df_tmp = df.Etnia.value_counts().to_frame().reset_index()
+    df_tmp.rename(columns={str(df_tmp.columns[0]):'Etnia', str(df_tmp.columns[1]):'Count'})
+    return df_tmp
+    
+def get_map_info(df):
+    return df.groupby('Departamento')[['Total']].sum().reset_index()
+####
+
+# Update Functions
+
+@app.callback(
+    dash.dependencies.Output('dd-output-container', 'children'),
+    [dash.dependencies.Input('filter-checklist', 'value')])
+def update_output(value):
+    return 'You have selected "{}"'.format(value)
+
+# Build Functions
 
 def build_title():
     return html.Div(
@@ -70,15 +123,22 @@ def build_tabs():
                 children=[
                     dcc.Tab(
                         id="Dashboard-tab",
-                        label="Main Dashboard",
+                        label="Dashboard RUV",
                         value="tab1",
+                        className="custom-tab",
+                        selected_className="custom-tab--selected",
+                    ),
+                    dcc.Tab(
+                        id="Dashboard-tab2",
+                        label="Dashboard RIPS",
+                        value="tab2",
                         className="custom-tab",
                         selected_className="custom-tab--selected",
                     ),
                     dcc.Tab(
                         id="Model-tab",
                         label="Predition Model",
-                        value="tab2",
+                        value="tab3",
                         className="custom-tab",
                         selected_className="custom-tab--selected",
                     ),
@@ -96,11 +156,24 @@ def build_tab_1():
             children=[
                 build_left_column(),
                 build_center_column(),
-                build_right_column(),
+                #build_right_column(),
             ]),
         ]
 
 def build_tab_2():
+    return [
+        dbc.Row(id="dashboard-filters", 
+            children=build_filters()
+        ),
+        dbc.Row(id="dashboar-container", 
+            children=[
+                build_left_column(),
+                build_center_column(),
+                build_right_column(),
+            ]),
+        ]
+
+def build_tab_3():
     return [html.Div(html.H1("Under construction, excuse us. ")),
             ]
 
@@ -121,7 +194,7 @@ def build_filters():
             ]
 
 def generate_dropdown():
-    return dcc.Dropdown(
+    return dcc.Dropdown(id='filter-dropdown',
                 options=[
                     {'label': 'New York City', 'value': 'NYC'},
                     {'label': 'Montreal', 'value': 'MTL'},
@@ -132,13 +205,14 @@ def generate_dropdown():
             )  
 
 def generate_checklist():
-    return dcc.Checklist(
+    return dcc.Checklist(id='filter-checklist',
                 options=[
-                    {'label': ' Victims', 'value': 'NYC'},
-                    {'label': ' Oldest', 'value': 'MTL'},
-                    {'label': ' With Dishabilities', 'value': 'SF'}
+                    {'label': ' Victims', 'value': 'WV'},
+                    {'label': ' Oldest', 'value': 'WO'},
+                    {'label': ' With Ethnicity', 'value': 'WE'},
+                    {'label': ' With Dishabilities', 'value': 'WD'}
                 ],
-                value=['NYC', 'MTL'],
+                value=['WV', 'WO', 'WE', 'WD'],
                 labelStyle={'display': 'block'}
             )  
 
@@ -153,30 +227,30 @@ def generate_range_slider():
                         step=None
                         )
 
-def build_gener():
+def build_gener(df):
     return html.Div(
                 id="gener",
                 className="gener",
                 children=[
                     dbc.Row(
-                        html.P("Total Base: 12.960.410"), id="row-titel-gener"
+                        html.P("Total Base: "+ str(total_vic(df) )), id="row-titel-gener"
                     ),
                     dbc.Row([
                         dbc.Col(html.Img(id="woman-logo", src=app.get_asset_url("woman.png"))),
                         dbc.Col(html.Img(id="man-logo", src=app.get_asset_url("man.png"))),
                     ],id="row-gener-logo"),
                     dbc.Row([
-                        dbc.Col(html.P("5.480.205")),
-                        dbc.Col(html.P("7.480.205")),
+                        dbc.Col(html.P(str(total_vic(df)/2))),
+                        dbc.Col(html.P(str(total_vic(df)/2))),
                     ],id="row-gener-values")
                                 
                 ]
             )
 
-def generate_piechart():
+def generate_piechart(df):
     return  dcc.Graph(
                         id="piechart",
-                        figure=(px.pie(px.data.tips(), values='tip', names='day').update_layout(
+                        figure=(px.pie(df, values=df.columns[1], names=df.columns[0]).update_layout(
                             paper_bgcolor="#F8F9F9",
                             title='Etnias',
                             autosize=True,           
@@ -253,11 +327,12 @@ def build_center_column():
                     children=[
                             dbc.Row(id="upper-center-section-container",
                                 children=[
-                                    dbc.Col(build_gener(),id="col-gener"),
-                                    dbc.Col(generate_piechart(),id="col-etnia"),
+                                    dbc.Col(build_gener(df_data_tmp),id="col-gener"),
+                                    dbc.Col(generate_piechart(get_Etnia(df_data_tmp)),id="col-etnia"),
                                 ]),
                              dbc.Row(
-                                dcc.Graph(figure=colombia_map.Map_Fig,id="colombia_map")
+                                dcc.Graph(figure=colombia_map.map(get_map_info(df_data_tmp)),
+                                id="colombia_map")
                                 , id='lower-center-section-container'
                                 ),
                     ]        
@@ -268,7 +343,7 @@ def build_right_column():
                     children=[
                         generate_violin_plot(),
                         html.H6("Top Diseases"), 
-                        generate_bar_h_chart(get_diseases()),
+                        generate_bar_h_chart(df_diseases),
                     ]        
                 )
 
