@@ -17,16 +17,17 @@ import numpy as np
 import datetime as dt
 import pandas as pd
 import urllib.request, json 
+import time
 
 #Recall app
 from app import app
-from lib import colombia_map,rips_charts
+from lib import def_graphic
 
 #### delete after integration
 data = [{"x": 23,"y":"CARIES DE LA DENTINA"},{    "x": 114,     "y": "HIPERTENSION"  },   {    "x": 630,     "y": "GASTRITIS"  },   {    "x": 720,     "y": "VAGINITIS"  },   {    "x": 530,     "y": "GINGIVITIS"  },   {    "x": 400,     "y": "LUMBAGO"  },   {    "x": 305,     "y": "INFECCION URINARIA"  },   {    "x": 213,     "y": "CEFALEA"  },   {    "x": 810,     "y": "DOLOR PELVICO"  }]
 df_diseases = pd.DataFrame.from_dict(data, orient='columns')
 df_diseases.sort_values(by=[df_diseases.columns[0]],inplace=True)
-
+data_canada = px.data.gapminder().query("country == 'Canada'")
 RIPS = pd.read_csv("./data/RIPS.txt", sep=";", nrows=1000000)
 RIPS['FechaAtencion'] = pd.to_datetime(RIPS['FechaAtencion'], format='%Y%m%d')
 RIPS['Year'] = pd.DatetimeIndex(RIPS.FechaAtencion).year
@@ -35,7 +36,6 @@ RIPS['Year'] = pd.DatetimeIndex(RIPS.FechaAtencion).year
 # IndAdultoMayor
 # IndEtnia
 # IndVictima	
-
 
 # Endpoionts functions
 
@@ -47,26 +47,18 @@ def get_df_from_url(url_in,sort_index=0):
     df.Total = pd.to_numeric(df.Total)
     return  df
 
-def get_data_summary():
+def get_data_summary(url, file):
     try:
-        return get_df_from_url("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",0)
+        return get_df_from_url(url,0)
     except:
-        with open('./data/ruv.json') as f:
+        with open(file) as f:
             data = json.load(f)
             df = pd.DataFrame.from_dict(data, orient='columns')
             df.Total = pd.to_numeric(df.Total)
         return df
     
-
-
-
-# Data
-df_data = get_data_summary()
-df_data_tmp = df_data.copy()
-
-
 def total_vic(df):
-    return df.Total.astype(int).sum()
+    return df.Total.sum()
 
 def get_Etnia(df):
     df_tmp = df.Etnia.value_counts().to_frame().reset_index()
@@ -74,8 +66,15 @@ def get_Etnia(df):
     return df_tmp
     
 def get_map_info(df):
-    return df.groupby('Departamento')[['Total']].sum().reset_index()
-####
+    try:
+        return df.groupby('CodigoDepartamento')[['Total']].sum().reset_index()
+    except:
+        return df.groupby('Departamento')[['Total']].sum().reset_index()
+
+
+def get_rips_Anno_Mes_TA(df):
+    df['AnnoMes']= df.Anno + df.Mes
+    return df.groupby(['AnnoMes','TipoAtencion'])[['Total']].sum().reset_index()
 
 # Update Functions
 
@@ -84,6 +83,12 @@ def get_map_info(df):
     [dash.dependencies.Input('filter-checklist', 'value')])
 def update_output(value):
     return 'You have selected "{}"'.format(value)
+
+
+# Data
+df_data_ruv = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",'./data/ruv.json')
+df_data_rips1 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/annomes",'./data/rips1.json')
+df_data_rips2 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/",'./data/rips2.json')
 
 # Build Functions
 
@@ -154,8 +159,8 @@ def build_tab_1():
         ),
         dbc.Row(id="dashboar-container", 
             children=[
-                build_left_column(),
-                build_center_column(),
+                build_left_column_tab1(),
+                build_center_column_tab1(),
                 #build_right_column(),
             ]),
         ]
@@ -167,9 +172,9 @@ def build_tab_2():
         ),
         dbc.Row(id="dashboar-container", 
             children=[
-                build_left_column(),
-                build_center_column(),
-                build_right_column(),
+                build_left_column_tab2(),
+                build_center_column_tab2(),
+                build_right_column_tab2(),
             ]),
         ]
 
@@ -227,125 +232,72 @@ def generate_range_slider():
                         step=None
                         )
 
-def build_gener(df):
-    return html.Div(
-                id="gener",
-                className="gener",
-                children=[
-                    dbc.Row(
-                        html.P("Total Base: "+ str(total_vic(df) )), id="row-titel-gener"
-                    ),
-                    dbc.Row([
-                        dbc.Col(html.Img(id="woman-logo", src=app.get_asset_url("woman.png"))),
-                        dbc.Col(html.Img(id="man-logo", src=app.get_asset_url("man.png"))),
-                    ],id="row-gener-logo"),
-                    dbc.Row([
-                        dbc.Col(html.P(str(total_vic(df)/2))),
-                        dbc.Col(html.P(str(total_vic(df)/2))),
-                    ],id="row-gener-values")
-                                
-                ]
-            )
-
-def generate_piechart(df):
-    return  dcc.Graph(
-                        id="piechart",
-                        figure=(px.pie(df, values=df.columns[1], names=df.columns[0]).update_layout(
-                            paper_bgcolor="#F8F9F9",
-                            title='Etnias',
-                            autosize=True,           
-                            margin={"r":0,"t":0,"l":0,"b":0},
-                            showlegend=False,
-                            )
-                        )
-                    )
-
-def generate_bar_h_chart(df):
-    return dcc.Graph(
-                        id="bar_h",
-                        figure=(go.Figure(go.Bar(
-                                x=df[df.columns[0]],
-                                y=df[df.columns[1]],
-                                marker_color=['#3a5544','#356046','#356046',
-                                '#2c6b48','#006b38','#00723e','#00804b','#138752','#1f8e58',
-                                '#439567','#6baa83','#90bfa1','#b5d4bf','#daeadf','#ffffff'],
-                                #"lightgreen",
-                                orientation='h'))).update_layout(
-                            paper_bgcolor="#F8F9F9",
-                            autosize=True,           
-                            margin={"r":0,"t":0,"l":0,"b":0},
-                            showlegend=False,
-                            )
-                    )
-
-def generate_line_chart():
-    return dcc.Graph(figure=px.line(px.data.gapminder().query("continent=='Oceania'")
-                        , x="year", y="lifeExp", color='country').update_layout(
-                            paper_bgcolor="#F8F9F9",
-                            title="Health Demand",
-                            autosize=True,           
-                            margin={"r":0,"t":0,"l":0,"b":0},
-                            showlegend=False,
-                            )
-                        , id='Char_line')
-
-def generate_bar_chart():
-    return dcc.Graph(
-                figure=rips_charts.bar_fig, id='Colombia_bar'
-            )
-
-def generate_violin_plot():
-    df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/violin_data.csv")
-    fig = go.Figure()
-    days = ['Thur', 'Fri', 'Sat', 'Sun']
-    for day in days:
-        fig.add_trace(go.Violin(x=df['day'][df['day'] == day],
-                                y=df['total_bill'][df['day'] == day],
-                                name=day,
-                                box_visible=True,
-                                meanline_visible=True))
-    fig.update_layout(paper_bgcolor="#F8F9F9",
-                            title="Health Demand",
-                            autosize=True,           
-                            margin={"r":0,"t":50,"l":0,"b":0},
-                            showlegend=False)
-    return dcc.Graph(
-                figure=fig, id='violin_plot'
-            )
-
-def build_left_column():
+def build_left_column_tab1():
     return dbc.Col( id="left-section-container",
                     children=[
                         html.H6("Services Demand"), 
-                        generate_bar_chart(),
-                        generate_line_chart(),
+                        def_graphic.generate_bar_chart(data_canada),
+                        #def_graphic.generate_line_chart(),
                     ]
                 )
 
-def build_center_column():
+def build_center_column_tab1():
     return dbc.Col( id="center-section-container",
                     children=[
                             dbc.Row(id="upper-center-section-container",
                                 children=[
-                                    dbc.Col(build_gener(df_data_tmp),id="col-gener"),
-                                    dbc.Col(generate_piechart(get_Etnia(df_data_tmp)),id="col-etnia"),
+                                    dbc.Col(def_graphic.build_gener(total_vic(df_data_ruv),
+                                        total_vic(df_data_ruv)/2,
+                                        total_vic(df_data_ruv)/2                                    
+                                    ),id="col-gener"),
+                                    dbc.Col(def_graphic.generate_piechart(get_Etnia(df_data_ruv)),id="col-etnia"),
                                 ]),
                              dbc.Row(
-                                dcc.Graph(figure=colombia_map.map(get_map_info(df_data_tmp)),
+                                dcc.Graph(figure=def_graphic.map(get_map_info(df_data_ruv)),
                                 id="colombia_map")
                                 , id='lower-center-section-container'
                                 ),
                     ]        
                 )
 
-def build_right_column():
-    return dbc.Col( id="right-section-container",
+
+def build_left_column_tab2():
+    return dbc.Col( id="left-section-container",
                     children=[
-                        generate_violin_plot(),
-                        html.H6("Top Diseases"), 
-                        generate_bar_h_chart(df_diseases),
+                        html.H6("Services Demand"), 
+                        def_graphic.generate_bar_chart(data_canada),
+                        def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
+                    ]
+                )
+
+def build_center_column_tab2():
+    return dbc.Col( id="center-section-container",
+                    children=[
+                            dbc.Row(id="upper-center-section-container",
+                                children=[
+                                    dbc.Col(def_graphic.build_gener(total_vic(df_data_rips1),
+                                        total_vic(df_data_rips1)/2,
+                                        total_vic(df_data_rips1)/2                                    
+                                    ),id="col-gener"),
+                                    dbc.Col(def_graphic.generate_piechart(get_Etnia(df_data_rips2)),id="col-etnia"),
+                                ]),
+                             dbc.Row(
+                                dcc.Graph(figure=def_graphic.map(get_map_info(df_data_rips1)),
+                                id="colombia_map")
+                                , id='lower-center-section-container'
+                                ),
                     ]        
                 )
+
+def build_right_column_tab2():
+    return dbc.Col( id="right-section-container",
+                    children=[
+                        def_graphic.generate_violin_plot(),
+                        html.H6("Top Diseases"), 
+                        def_graphic.generate_bar_h_chart(df_diseases),
+                    ]        
+                )
+
 
 #Create Layout
 
@@ -368,11 +320,13 @@ app.layout = html.Div(
     Output("app-content", "children"),
     [Input("app-tabs", "value")],
 )
-def render_tab_content(tab_switch):
+def render_tab_content(tab_switch):    
     if tab_switch == "tab1":
         return build_tab_1()
-    else:
+    elif tab_switch == "tab2":
         return build_tab_2()
+    else:
+        return build_tab_3()
     
 if __name__ == "__main__":
     app.run_server(debug=True)

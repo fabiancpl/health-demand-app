@@ -275,3 +275,31 @@ p {
 #colombia_map{
   height: 100%;	
 }
+
+
+/* Loading */
+*[data-dash-is-loading="true"]{
+    visibility: hidden;
+}
+*[data-dash-is-loading="true"]::before{
+  content: "Loading...";
+  align-content: center;
+  display: block;
+  color: grey;
+  visibility: visible;
+  border: 12px solid #f3f3f3; /* Light grey */
+  /*border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 520px;
+  height: 520px;
+  /*animation: spin 6s linear infinite;*/
+  background: url(Logo.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 32rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
