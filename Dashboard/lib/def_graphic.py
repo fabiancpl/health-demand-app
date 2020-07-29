@@ -23,23 +23,23 @@ from app import app
 
 def map(df,geojson):
     #Create the map:
-    #Map_Fig=px.choropleth_mapbox(df,               #Data
-    #            locations=df.columns[0],                #Column containing the identifiers used in the GeoJSON file 
-    #            color=df.columns[1],                           #Column giving the color intensity of the region
-    #            geojson=geojson,                          #The GeoJSON file
-    #            zoom=4,                                   #Zoom
-    #            mapbox_style="carto-positron",                  #Mapbox style, for different maps you need a Mapbox account and a token
-    #            center={"lat": 4.0902, "lon": -72.7129},  #Center
-    #            color_continuous_scale="YlGn",            #Color Scheme
-    #            opacity=0.5,                              #Opacity of the map
-    #            )
-    #
-    #
-    #Map_Fig.update_layout(title='Health in Colmbia',
-    #paper_bgcolor="#F8F9F9",
-    #margin={"r":0,"t":0,"l":0,"b":0} )
-    # return dcc.Graph(figure=Map_Fig,id="colombia_map") 
-    return html.P('Hola',id="colombia_map")  # delete and uncomment 
+    Map_Fig=px.choropleth_mapbox(df,               #Data
+                locations=df.columns[0],                #Column containing the identifiers used in the GeoJSON file 
+                color=df.columns[1],                           #Column giving the color intensity of the region
+                geojson=geojson,                          #The GeoJSON file
+                zoom=4,                                   #Zoom
+                mapbox_style="carto-positron",                  #Mapbox style, for different maps you need a Mapbox account and a token
+                center={"lat": 4.0902, "lon": -72.7129},  #Center
+                color_continuous_scale="YlGn",            #Color Scheme
+                opacity=0.5,                              #Opacity of the map
+                )
+    
+    
+    Map_Fig.update_layout(title='Health in Colmbia',
+    paper_bgcolor="#F8F9F9",
+    margin={"r":0,"t":0,"l":0,"b":0} )
+    return dcc.Graph(figure=Map_Fig,id="colombia_map") 
+    #return html.P('Hola',id="colombia_map")  # delete and uncomment 
 
 def build_gener(total, men, women):
     return html.Div(
