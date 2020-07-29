@@ -27,31 +27,26 @@ from lib import def_graphic
 data = [{"x": 23,"y":"CARIES DE LA DENTINA"},{    "x": 114,     "y": "HIPERTENSION"  },   {    "x": 630,     "y": "GASTRITIS"  },   {    "x": 720,     "y": "VAGINITIS"  },   {    "x": 530,     "y": "GINGIVITIS"  },   {    "x": 400,     "y": "LUMBAGO"  },   {    "x": 305,     "y": "INFECCION URINARIA"  },   {    "x": 213,     "y": "CEFALEA"  },   {    "x": 810,     "y": "DOLOR PELVICO"  }]
 df_diseases = pd.DataFrame.from_dict(data, orient='columns')
 df_diseases.sort_values(by=[df_diseases.columns[0]],inplace=True)
-data_canada = px.data.gapminder().query("country == 'Canada'")
-RIPS = pd.read_csv("./data/RIPS.txt", sep=";", nrows=1000000)
-RIPS['FechaAtencion'] = pd.to_datetime(RIPS['FechaAtencion'], format='%Y%m%d')
-RIPS['Year'] = pd.DatetimeIndex(RIPS.FechaAtencion).year
-
-# IndDiscapacidad
-# IndAdultoMayor
-# IndEtnia
-# IndVictima	
 
 # Endpoionts functions
 
-def get_df_from_url(url_in,sort_index=0):
+def read_json(url_in):
     with urllib.request.urlopen(url_in) as url:
-        data = json.loads(url.read().decode())
-    df=pd.json_normalize(data)
+        data = json.loads(url.read().decode('UTF-8'))
+    return data
+
+def get_df_from_url(url_in,sort_index=0):
+    df=pd.json_normalize(read_json(url_in))
     df.sort_values(by=[df.columns[sort_index]],inplace=True)
     df.Total = pd.to_numeric(df.Total)
     return  df
 
 def get_data_summary(url, file):
     try:
+        #print (0/0)   # Delete 
         return get_df_from_url(url,0)
     except:
-        with open(file) as f:
+        with open(file, encoding='UTF-8') as f:
             data = json.load(f)
             df = pd.DataFrame.from_dict(data, orient='columns')
             df.Total = pd.to_numeric(df.Total)
@@ -60,9 +55,15 @@ def get_data_summary(url, file):
 def total_vic(df):
     return df.Total.sum()
 
+def total_men(df):
+    return df[df['Sexo']=='Masculino'].Total.sum()
+
+def total_women(df):
+    return df[df['Sexo']=='Femenino'].Total.sum()
+
 def get_Etnia(df):
     df_tmp = df.Etnia.value_counts().to_frame().reset_index()
-    df_tmp.rename(columns={str(df_tmp.columns[0]):'Etnia', str(df_tmp.columns[1]):'Count'})
+    df_tmp.rename(columns={str(df_tmp.columns[0]):'Etnia', str(df_tmp.columns[1]):'Count'},inplace=True)
     return df_tmp
     
 def get_map_info(df):
@@ -76,19 +77,32 @@ def get_rips_Anno_Mes_TA(df):
     df['AnnoMes']= df.Anno + df.Mes
     return df.groupby(['AnnoMes','TipoAtencion'])[['Total']].sum().reset_index()
 
-# Update Functions
-
-@app.callback(
-    dash.dependencies.Output('dd-output-container', 'children'),
-    [dash.dependencies.Input('filter-checklist', 'value')])
-def update_output(value):
-    return 'You have selected "{}"'.format(value)
+def get_discapacidad(df):
+    df_tmp =  df.Discapacidad.value_counts().to_frame().reset_index()
+    df_tmp.rename(columns={str(df_tmp.columns[0]):'Discapacidad', str(df_tmp.columns[1]):'Count'},inplace=True)
+    return df_tmp;
 
 
-# Data
-df_data_ruv = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",'./data/ruv.json')
-df_data_rips1 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/annomes",'./data/rips1.json')
-df_data_rips2 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/",'./data/rips2.json')
+def get_TipoAtencion(df):
+    df_tmp =  df.TipoAtencion.value_counts().to_frame().reset_index()
+    df_tmp.rename(columns={str(df_tmp.columns[0]):'TipoAtencion', str(df_tmp.columns[1]):'Count'},inplace=True)
+    return df_tmp;
+
+def load_data():
+    start = time.time()
+    # Data
+    global df_data_ruv,df_data_rips1,df_data_rips2,geojson,df_data_ruv_o,df_data_rips1_o,df_data_rips2_o
+    with open('data\\polygon_colombia.json', encoding='UTF-8') as geo:
+        geojson = json.loads(geo.read())
+    df_data_ruv = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",'./data/ruv.json')
+    df_data_ruv_o = df_data_ruv.copy()
+    df_data_rips1 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/annomes",'./data/rips1.json')
+    df_data_rips1_o = df_data_rips1.copy()
+    df_data_rips2 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/",'./data/rips2.json')
+    df_data_rips2_o = df_data_rips2.copy()
+    end = time.time()
+    print(end - start)
+
 
 # Build Functions
 
@@ -179,7 +193,10 @@ def build_tab_2():
         ]
 
 def build_tab_3():
-    return [html.Div(html.H1("Under construction, excuse us. ")),
+    return [dbc.Row(id="dashboard-filters", 
+            children=build_filters()
+            ),
+            html.Div(html.H1("Under construction, excuse us. "),id='test'),
             ]
 
 def build_filters():
@@ -201,9 +218,9 @@ def build_filters():
 def generate_dropdown():
     return dcc.Dropdown(id='filter-dropdown',
                 options=[
-                    {'label': 'New York City', 'value': 'NYC'},
-                    {'label': 'Montreal', 'value': 'MTL'},
-                    {'label': 'San Francisco', 'value': 'SF'}
+                    {'label': 'Bogota', 'value': 'NYC'},
+                    {'label': 'Cali', 'value': 'MTL'},
+                    {'label': 'Medellin', 'value': 'SF'}
                 ],
                 value=['MTL', 'NYC'],
                 multi=True
@@ -212,12 +229,12 @@ def generate_dropdown():
 def generate_checklist():
     return dcc.Checklist(id='filter-checklist',
                 options=[
-                    {'label': ' Victims', 'value': 'WV'},
-                    {'label': ' Oldest', 'value': 'WO'},
-                    {'label': ' With Ethnicity', 'value': 'WE'},
-                    {'label': ' With Dishabilities', 'value': 'WD'}
+                    {'label': ' Victims', 'value': 'EsVictima'},
+                    {'label': ' Oldest', 'value': 'EsAdultoMayor'},
+                    {'label': ' With Ethnicity', 'value': 'PerteneceEtnia'},
+                    {'label': ' With Dishabilities', 'value': 'TieneDiscapacidad'}
                 ],
-                value=['WV', 'WO', 'WE', 'WD'],
+                value=['EsVictima','EsAdultoMayor', 'PerteneceEtnia', 'TieneDiscapacidad'],
                 labelStyle={'display': 'block'}
             )  
 
@@ -235,9 +252,12 @@ def generate_range_slider():
 def build_left_column_tab1():
     return dbc.Col( id="left-section-container",
                     children=[
-                        html.H6("Services Demand"), 
-                        def_graphic.generate_bar_chart(data_canada),
+                        dbc.Row(children=[
+                        dbc.Col(id="col-piramide"),
+                        def_graphic.generate_piechart('Discapacidad',get_discapacidad(df_data_ruv)),
                         #def_graphic.generate_line_chart(),
+                        
+                        ]),
                     ]
                 )
 
@@ -246,18 +266,14 @@ def build_center_column_tab1():
                     children=[
                             dbc.Row(id="upper-center-section-container",
                                 children=[
-                                    dbc.Col(def_graphic.build_gener(total_vic(df_data_ruv),
-                                        total_vic(df_data_ruv)/2,
-                                        total_vic(df_data_ruv)/2                                    
-                                    ),id="col-gener"),
-                                    dbc.Col(def_graphic.generate_piechart(get_Etnia(df_data_ruv)),id="col-etnia"),
+                                    dbc.Col(id="col-gener"),
+                                    dbc.Col(id="col-etnia"),
                                 ]),
-                             dbc.Row(
-                                dcc.Graph(figure=def_graphic.map(get_map_info(df_data_ruv)),
-                                id="colombia_map")
-                                , id='lower-center-section-container'
-                                ),
-                    ]        
+                             dbc.Row(id='lower-center-section-container',
+                                children=[
+                                dbc.Col(id='col-map'), 
+                                ]),
+                    ]
                 )
 
 
@@ -265,7 +281,7 @@ def build_left_column_tab2():
     return dbc.Col( id="left-section-container",
                     children=[
                         html.H6("Services Demand"), 
-                        def_graphic.generate_bar_chart(data_canada),
+                        def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1)),
                         def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
                     ]
                 )
@@ -279,11 +295,10 @@ def build_center_column_tab2():
                                         total_vic(df_data_rips1)/2,
                                         total_vic(df_data_rips1)/2                                    
                                     ),id="col-gener"),
-                                    dbc.Col(def_graphic.generate_piechart(get_Etnia(df_data_rips2)),id="col-etnia"),
+                                    dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)),id="col-etnia"),
                                 ]),
                              dbc.Row(
-                                dcc.Graph(figure=def_graphic.map(get_map_info(df_data_rips1)),
-                                id="colombia_map")
+                                def_graphic.map(get_map_info(df_data_rips1),geojson)
                                 , id='lower-center-section-container'
                                 ),
                     ]        
@@ -316,17 +331,47 @@ app.layout = html.Div(
     ],
 )
 
+
+# Update Functions
 @app.callback(
     Output("app-content", "children"),
     [Input("app-tabs", "value")],
 )
-def render_tab_content(tab_switch):    
+def render_tab_content(tab_switch): 
     if tab_switch == "tab1":
         return build_tab_1()
     elif tab_switch == "tab2":
         return build_tab_2()
     else:
         return build_tab_3()
-    
+
+@app.callback([
+    Output("col-gener", "children"),
+    Output("col-etnia", "children"),
+    Output("col-map", "children"),
+    Output("col-piramide", "children"),],
+    [Input("filter-checklist", "value")],
+)
+def update_output(value):
+    if not value:
+        tmp_df = pd.DataFrame(columns=df_data_ruv.columns)
+    elif 'EsVictima' in value:
+        tmp_df = df_data_ruv
+    else:
+        tmp_df = df_data_ruv
+        for i in value:
+            tmp_df = tmp_df[tmp_df[i]=='Si']
+    gener = def_graphic.build_gener(total_vic(tmp_df),
+                                        total_men(tmp_df),
+                                        total_women(tmp_df)                                    
+                                    )
+    etnia = def_graphic.generate_piechart('Etnias',get_Etnia(tmp_df))
+    map = def_graphic.map(get_map_info(tmp_df),geojson)
+    piramide = def_graphic.generate_Stacked_barchar(tmp_df,'Piramide Poblacional')
+    return gener,etnia, map, piramide
+    # return 'You have selected "{}"'.format(value)
+
+
 if __name__ == "__main__":
+    load_data()
     app.run_server(debug=True)

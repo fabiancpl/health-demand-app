@@ -21,26 +21,25 @@ import geopandas as gpd
 from app import app
 
 
-def map(df):
-    with open('data\\polygon_colombia.json') as geo:
-        geojson = json.loads(geo.read())
+def map(df,geojson):
     #Create the map:
-    Map_Fig=px.choropleth_mapbox(df,               #Data
-                locations=df.columns[0],                #Column containing the identifiers used in the GeoJSON file 
-                color=df.columns[1],                           #Column giving the color intensity of the region
-                geojson=geojson,                          #The GeoJSON file
-                zoom=4,                                   #Zoom
-                mapbox_style="white-bg",                  #Mapbox style, for different maps you need a Mapbox account and a token
-                center={"lat": 4.0902, "lon": -72.7129},  #Center
-                color_continuous_scale="YlGn",            #Color Scheme
-                opacity=0.5,                              #Opacity of the map
-                )
-
-
-    Map_Fig.update_layout(title='Health in Colmbia',
-    paper_bgcolor="#F8F9F9",
-    margin={"r":0,"t":0,"l":0,"b":0} )
-    return Map_Fig
+    #Map_Fig=px.choropleth_mapbox(df,               #Data
+    #            locations=df.columns[0],                #Column containing the identifiers used in the GeoJSON file 
+    #            color=df.columns[1],                           #Column giving the color intensity of the region
+    #            geojson=geojson,                          #The GeoJSON file
+    #            zoom=4,                                   #Zoom
+    #            mapbox_style="carto-positron",                  #Mapbox style, for different maps you need a Mapbox account and a token
+    #            center={"lat": 4.0902, "lon": -72.7129},  #Center
+    #            color_continuous_scale="YlGn",            #Color Scheme
+    #            opacity=0.5,                              #Opacity of the map
+    #            )
+    #
+    #
+    #Map_Fig.update_layout(title='Health in Colmbia',
+    #paper_bgcolor="#F8F9F9",
+    #margin={"r":0,"t":0,"l":0,"b":0} )
+    # return dcc.Graph(figure=Map_Fig,id="colombia_map") 
+    return html.P('Hola',id="colombia_map")  # delete and uncomment 
 
 def build_gener(total, men, women):
     return html.Div(
@@ -62,12 +61,12 @@ def build_gener(total, men, women):
                 ]
             )
 
-def generate_piechart(df):
+def generate_piechart(title_df,df):
     return  dcc.Graph(
                         id="piechart",
                         figure=(px.pie(df, values=df.columns[1], names=df.columns[0]).update_layout(
                             paper_bgcolor="#F8F9F9",
-                            title='Etnias',
+                            title=title_df,
                             autosize=True,           
                             margin={"r":0,"t":0,"l":0,"b":0},
                             showlegend=False,
@@ -105,7 +104,7 @@ def generate_line_chart(df):
 
 def generate_bar_chart(df):
     return dcc.Graph(
-                figure= px.bar(df, x='year', y='pop').update_layout(title='Health in Colombia'),
+                figure= px.bar(df, x=df.columns[0], y=df.columns[1]).update_layout(title='Health in Colombia'),
                 id='Colombia_bar'
             )
 
@@ -128,5 +127,46 @@ def generate_violin_plot():
                 figure=fig, id='violin_plot'
             )
 
+def generate_Stacked_barchar(df,title):
+    df_tmp = pd.pivot_table(df[df.GrupoEdad !=  'NA'], values='Total', index=['GrupoEdad'],columns=['Sexo'], aggfunc=np.sum).reset_index()
+    df_tmp['Index']=pd.to_numeric(df_tmp.GrupoEdad.str.split(',',expand=True)[0].str.split('[',expand=True)[1])
+    df_tmp.sort_values(by='Index',inplace=True)
+    layout = go.Layout( title = 'Victim people per age and sex',
+                       yaxis = go.layout.YAxis( title = 'Age group' ),
+                       xaxis = go.layout.XAxis(
+                           #range = [ -40000, 60000 ],
+                           title = 'Number of victim people'
+                       ),
+                       barmode = 'overlay',
+                       bargap = 0.1
+                      )
+
+    data = [ go.Bar( y = df_tmp[ 'GrupoEdad' ].astype( str ),
+                    x = df_tmp['Masculino']*-1,
+                    orientation = 'h',
+                    name = 'Men',
+                    text = df_tmp[ 'Masculino' ],
+                    hoverinfo = 'text',
+                    marker = dict( color = '#beaed4' )
+                   ),
+            go.Bar( y = df_tmp[ 'GrupoEdad' ].astype( str ),
+                   x = df_tmp[ 'Femenino' ],
+                   orientation = 'h',
+                   name ='Women',
+                   text = df_tmp[ 'Femenino' ],
+                   hoverinfo = 'text',
+                   marker = dict( color = '#fdc086' )
+                  ) 
+           ]
+
+    fig = go.Figure( dict( data = data, layout = layout ) ).update_layout(paper_bgcolor="#F8F9F9",
+                                                                        width=550,
+                                                                        height=320,
+                                                                        title=title,        
+                                                                        margin={"r":0,"t":50,"l":0,"b":0},
+                                                                        showlegend=True)
+    return dcc.Graph(
+                figure=fig, id='stacked_plot'
+            )
 
     

@@ -262,7 +262,7 @@ p {
   justify-content: center;
 }
 
-#Char_line, #violin_plot {
+#Char_line, #violin_plot #stacked_plot {
   height: 50%;
   width: 100%;
 }
@@ -282,21 +282,17 @@ p {
     visibility: hidden;
 }
 *[data-dash-is-loading="true"]::before{
-  content: "Loading...";
-  align-content: center;
-  display: block;
-  color: grey;
+  content: "";
+  align-items: center;
+  display: inline-block;
+  color: magenta;
   visibility: visible;
-  border: 12px solid #f3f3f3; /* Light grey */
-  /*border-top: 16px solid #3498db; /* Blue */
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
   border-radius: 50%;
-  width: 520px;
-  height: 520px;
-  /*animation: spin 6s linear infinite;*/
-  background: url(Logo.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 32rem;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
 }
 
 @keyframes spin {
