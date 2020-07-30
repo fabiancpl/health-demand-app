@@ -196,11 +196,15 @@ def build_tab_3():
             ]
 
 def build_filters_tab1():
-    return [
-            dbc.Col(
-                generate_checklist('checklist_tab1'),
-                id="center-section-filters"
+    return [                
+            dbc.Col([
+				dbc.Row(dbc.Alert("Los Registros", color="primary"), id="RUV-definition"),
+								   
+                dbc.Row(generate_checklist('checklist_tab1'), id="center-section-filters"),
+				],
+                id="RUVandchecklist"
                 ),
+                
             dbc.Col(
                 generate_dropdown('dropdown_tab1'),
                 id="left-section-filters"
@@ -209,14 +213,27 @@ def build_filters_tab1():
 
 def build_filters_tab2():
     return [
-            dbc.Col(
-                generate_range_slider('range_slider_tab2'),
-                id="right-section-filters"
+    
+			dbc.Col([
+				dbc.Row(dbc.Alert("Los Registros Individuales de Prestación de Servicios de Salud – RIPS, son\
+								   el conjunto de datos mínimos y básicos que el Sistema General de \
+								   Seguridad Social en salud requiere para los procesos de dirección, regulación y \
+								   control y como soporte de la venta de servicios, cuya denominación, estructura \
+								   y características se ha unificado y estandarizado para todas las entidades y que \
+								   sirven para restablecer politicas de salud, reformular la cobertura de servicios para \
+								   con ello mejorar la oferta de servicios de salud en el país"
+								   ,color="primary"), id="RIP-definition"),
+                
+                dbc.Row(
+					[
+						dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
+						dbc.Col(generate_checklist('checklist_tab2'), id="center-section-filters"),
+					], id="Checklistandslider",
                 ),
-            dbc.Col(
-                generate_checklist('checklist_tab2'),
-                id="center-section-filters"
+				],
+                id="ripandchecklist"
                 ),
+                                
             dbc.Col(
                 generate_dropdown('dropdown_tab2'),
                 id="left-section-filters"
@@ -285,9 +302,10 @@ def build_center_column_tab1():
 def build_left_column_tab2():
     return dbc.Col( id="left-section-container",
                     children=[
+						
                         def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
                         def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
-                    ]
+                    ],
                 )
 
 def build_center_column_tab2():
@@ -298,12 +316,15 @@ def build_center_column_tab2():
                                     dbc.Col(def_graphic.build_gener(total_vic(df_data_rips1),
                                         total_vic(df_data_rips1)/2,
                                         total_vic(df_data_rips1)/2                                    
-                                    ),id="col-gener"),
-                                    dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)),id="col-etnia"),
-                                ]),
+                                    ),id="col-gener", width=10.00),
+                                    dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)), id="col-etnia"),
+                                ], justify="center",
+                                ),
                              dbc.Row(
+                                dbc.Col(
                                 def_graphic.map(get_map_info(df_data_rips1),geojson)
                                 , id='lower-center-section-container'
+                                ), align="center",
                                 ),
                     ]        
                 )

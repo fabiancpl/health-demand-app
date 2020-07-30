@@ -23,15 +23,16 @@ from app import app
 
 def map(df,geojson):
     #Create the map:
-    Map_Fig=px.choropleth_mapbox(df,               #Data
-                locations=df.columns[0],                #Column containing the identifiers used in the GeoJSON file 
+    Map_Fig=px.choropleth_mapbox(df,                           #Data
+                locations=df.columns[0],                       #Column containing the identifiers used in the GeoJSON file 
                 color=df.columns[1],                           #Column giving the color intensity of the region
-                geojson=geojson,                          #The GeoJSON file
-                zoom=4,                                   #Zoom
-                mapbox_style="carto-positron",                  #Mapbox style, for different maps you need a Mapbox account and a token
-                center={"lat": 4.0902, "lon": -72.7129},  #Center
-                color_continuous_scale="YlGn",            #Color Scheme
-                opacity=0.5,                              #Opacity of the map
+                geojson=geojson,                               #The GeoJSON file
+                zoom=3.5,                                        #Zoom
+                mapbox_style="carto-positron",                 #Mapbox style, for different maps you need a Mapbox account and a token
+                center={"lat": 4.624335, "lon": -74.063644},   #Center
+                color_continuous_scale='RdBu',            #Color Scheme
+                opacity=0.5,                                   #Opacity of the map
+                width=450, height=400
                 )
     
     
@@ -50,12 +51,14 @@ def build_gener(total, men, women):
                         html.P("Total Base: "+ str(total)), id="row-titel-gener"
                     ),
                     dbc.Row([
-                        dbc.Col(html.Img(id="woman-logo", src=app.get_asset_url("woman.png"))),
+                        dbc.Col(
+                        html.Img(id="woman-logo", src=app.get_asset_url("woman.png"))
+                        ),
                         dbc.Col(html.Img(id="man-logo", src=app.get_asset_url("man.png"))),
                     ],id="row-gener-logo"),
                     dbc.Row([
-                        dbc.Col(html.P(str(men))),
-                        dbc.Col(html.P(str(women))),
+                        dbc.Col([html.P(str(men)), html.P("Mujer ")]),
+						dbc.Col([html.P(str(women)), html.P("Hombre ")]),
                     ],id="row-gener-values")
                                 
                 ]
