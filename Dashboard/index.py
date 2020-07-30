@@ -217,11 +217,8 @@ def build_filters_tab2():
 			dbc.Col([
 				dbc.Row(dbc.Alert("Los Registros Individuales de Prestación de Servicios de Salud – RIPS, son\
 								   el conjunto de datos mínimos y básicos que el Sistema General de \
-								   Seguridad Social en salud requiere para los procesos de dirección, regulación y \
-								   control y como soporte de la venta de servicios, cuya denominación, estructura \
-								   y características se ha unificado y estandarizado para todas las entidades y que \
-								   sirven para restablecer politicas de salud, reformular la cobertura de servicios para \
-								   con ello mejorar la oferta de servicios de salud en el país"
+								   Seguridad Social en salud requiere para los procesos de dirección, regulación \
+								   , control y soporte. sirven para restablecer politicas de salud, reformular la cobertura y mejorar la oferta de servicios de salud en el país"
 								   ,color="primary"), id="RIP-definition"),
                 
                 dbc.Row(
