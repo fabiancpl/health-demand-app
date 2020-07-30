@@ -121,7 +121,8 @@ def build_title():
             html.Div(
                 id="banner-logo",
                 children=[
-                    html.Img(id="logo", src=app.get_asset_url("DS4A_latam_logo.png")),
+                    #html.Img(id="logo", src=app.get_asset_url("DS4A_latam_logo.png")),
+                    html.Img(id="logo", src=app.get_asset_url("ministeriodesaludlogo.png"), style={'height':'100%', 'width':'100%'}),
                 ],
             ),
         ],
@@ -329,9 +330,20 @@ app.layout = html.Div(
                 # Main app
                 html.Div(id="app-content"),
             ],
-        )
-    ],
-)
+        ),
+    html.Div(
+		dcc.Markdown('''
+			**DISCLAIMER:** Este Sitio web es puesto a disposición por 
+			el equipo 61 del curso DS4A sólo con fines pedagógicos e 
+			informativos y no para proporcionar asesoramiento legal o 
+			clínico. El usuario comprende que la información contiene 
+			declaraciones que constituyen pronósticos y no representan 
+			la opinión del ministerio de salud y protección social de 
+			Colombia.	
+			'''),
+			),
+		],
+	)
 
 # Update Functions
 
