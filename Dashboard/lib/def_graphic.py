@@ -68,7 +68,7 @@ def generate_piechart(title_df,df):
                             paper_bgcolor="#F8F9F9",
                             title=title_df,
                             autosize=True,           
-                            margin={"r":0,"t":0,"l":0,"b":0},
+                            margin={"r":0,"t":30,"l":0,"b":0},
                             showlegend=False,
                             )
                         )
@@ -96,15 +96,23 @@ def generate_line_chart(df):
     return dcc.Graph(figure=px.line(df, x=df.columns[0], y=df.columns[2], color=df.columns[1]
             ).update_layout(
                             paper_bgcolor="#F8F9F9",
-                            title="Health Demand",
+                            #title="Health Demand",
                             autosize=True,           
-                            margin={"r":0,"t":0,"l":0,"b":0},
+                            margin={"r":0,"t":50,"l":0,"b":0},
                             showlegend=True,
+                            legend=dict(
+                                    yanchor="bottom",
+                                    orientation="h",
+                                    y=0.99,
+                                    xanchor="left",
+                                    x=0.01
+                                )
                             ), id='Char_line')
 
-def generate_bar_chart(df):
+def generate_bar_chart(df,title):
+    df = df.sort_values(by=df.columns[1])
     return dcc.Graph(
-                figure= px.bar(df, x=df.columns[0], y=df.columns[1]).update_layout(title='Health in Colombia'),
+                figure= px.bar(df, x=df.columns[0], y=df.columns[1]).update_layout(title=title ,paper_bgcolor="#F8F9F9"),
                 id='Colombia_bar'
             )
 
@@ -160,11 +168,19 @@ def generate_Stacked_barchar(df,title):
            ]
 
     fig = go.Figure( dict( data = data, layout = layout ) ).update_layout(paper_bgcolor="#F8F9F9",
-                                                                        width=550,
+                                                                        #width=530,
                                                                         height=320,
+                                                                        autosize=True,
                                                                         title=title,        
                                                                         margin={"r":0,"t":50,"l":0,"b":0},
-                                                                        showlegend=True)
+                                                                        showlegend=True,
+                                                                        legend=dict(
+                                                                                yanchor="top",
+                                                                                y=0.99,
+                                                                                xanchor="left",
+                                                                                x=0.01
+                                                                            )
+                                                                        )
     return dcc.Graph(
                 figure=fig, id='stacked_plot'
             )

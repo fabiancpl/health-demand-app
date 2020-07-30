@@ -74,7 +74,7 @@ def get_map_info(df):
 
 
 def get_rips_Anno_Mes_TA(df):
-    df['AnnoMes']= df.Anno + df.Mes
+    df['AnnoMes']= df.Anno + '-' + df.Mes
     return df.groupby(['AnnoMes','TipoAtencion'])[['Total']].sum().reset_index()
 
 def get_discapacidad(df):
@@ -84,22 +84,22 @@ def get_discapacidad(df):
 
 
 def get_TipoAtencion(df):
-    df_tmp =  df.TipoAtencion.value_counts().to_frame().reset_index()
+    df_tmp =  df.groupby('TipoAtencion')[['Total']].sum().reset_index()
     df_tmp.rename(columns={str(df_tmp.columns[0]):'TipoAtencion', str(df_tmp.columns[1]):'Count'},inplace=True)
     return df_tmp;
 
 def load_data():
     start = time.time()
     # Data
-    global df_data_ruv,df_data_rips1,df_data_rips2,geojson,df_data_ruv_o,df_data_rips1_o,df_data_rips2_o
-    with open('data\\polygon_colombia.json', encoding='UTF-8') as geo:
+    global df_data_ruv,df_data_rips1,df_data_rips2,geojson
+    with open('./data/polygon_colombia.json', encoding='UTF-8') as geo:
         geojson = json.loads(geo.read())
     df_data_ruv = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",'./data/ruv.json')
-    df_data_ruv_o = df_data_ruv.copy()
     df_data_rips1 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/annomes",'./data/rips1.json')
-    df_data_rips1_o = df_data_rips1.copy()
     df_data_rips2 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/",'./data/rips2.json')
-    df_data_rips2_o = df_data_rips2.copy()
+    df_data_ruv.Total = pd.to_numeric(df_data_ruv.Total)
+    df_data_rips1.Total = pd.to_numeric(df_data_rips1.Total)
+    df_data_rips2.Total = pd.to_numeric(df_data_rips2.Total)
     end = time.time()
     print(end - start)
 
@@ -121,9 +121,6 @@ def build_title():
             html.Div(
                 id="banner-logo",
                 children=[
-                    #html.Button(
-                    #    id="learn-more-button", children="Team 61", n_clicks=0
-                    #),
                     html.Img(id="logo", src=app.get_asset_url("DS4A_latam_logo.png")),
                 ],
             ),
@@ -169,7 +166,7 @@ def build_tabs():
 def build_tab_1():
     return [
         dbc.Row(id="dashboard-filters", 
-            children=build_filters()
+            children=build_filters_tab1()
         ),
         dbc.Row(id="dashboar-container", 
             children=[
@@ -182,52 +179,60 @@ def build_tab_1():
 def build_tab_2():
     return [
         dbc.Row(id="dashboard-filters", 
-            children=build_filters()
+            children=build_filters_tab2()
         ),
         dbc.Row(id="dashboar-container", 
             children=[
                 build_left_column_tab2(),
                 build_center_column_tab2(),
-                build_right_column_tab2(),
+                #build_right_column_tab2(),
             ]),
         ]
 
 def build_tab_3():
-    return [dbc.Row(id="dashboard-filters", 
-            children=build_filters()
-            ),
+    return [
             html.Div(html.H1("Under construction, excuse us. "),id='test'),
             ]
 
-def build_filters():
+def build_filters_tab1():
     return [
             dbc.Col(
-                generate_range_slider(),
-                id="right-section-filters"
-                ),
-            dbc.Col(
-                generate_checklist(),
+                generate_checklist('checklist_tab1'),
                 id="center-section-filters"
                 ),
             dbc.Col(
-                generate_dropdown(),
+                generate_dropdown('dropdown_tab1'),
                 id="left-section-filters"
                 ),
             ]
 
-def generate_dropdown():
-    return dcc.Dropdown(id='filter-dropdown',
-                options=[
-                    {'label': 'Bogota', 'value': 'NYC'},
-                    {'label': 'Cali', 'value': 'MTL'},
-                    {'label': 'Medellin', 'value': 'SF'}
-                ],
-                value=['MTL', 'NYC'],
+def build_filters_tab2():
+    return [
+            dbc.Col(
+                generate_range_slider('range_slider_tab2'),
+                id="right-section-filters"
+                ),
+            dbc.Col(
+                generate_checklist('checklist_tab2'),
+                id="center-section-filters"
+                ),
+            dbc.Col(
+                generate_dropdown('dropdown_tab2'),
+                id="left-section-filters"
+                ),
+            ]
+
+def generate_dropdown(id_html):
+    tmp_df = df_data_ruv.groupby(['CodigoDepartamento','Departamento'])[['Total']].sum().reset_index().drop('Total',1)
+    tmp_df.rename(columns={tmp_df.columns[0]:'value',tmp_df.columns[1]:'label'},inplace=True)
+    return dcc.Dropdown(id=id_html,
+                options=tmp_df.to_dict('records'),
+                value=tmp_df[tmp_df.columns[0]].tolist(),
                 multi=True
             )  
 
-def generate_checklist():
-    return dcc.Checklist(id='filter-checklist',
+def generate_checklist(id_html):
+    return dcc.Checklist(id=id_html,
                 options=[
                     {'label': ' Victims', 'value': 'EsVictima'},
                     {'label': ' Oldest', 'value': 'EsAdultoMayor'},
@@ -238,9 +243,9 @@ def generate_checklist():
                 labelStyle={'display': 'block'}
             )  
 
-def generate_range_slider():
+def generate_range_slider(id_html):
     return dcc.RangeSlider(
-                        id='year-slider',
+                        id=id_html,
                         min=2016,#df['year'].min(),
                         max=2019,#df['year'].max(),
                         value=[2016,2019],#df['year'].min(),
@@ -254,10 +259,10 @@ def build_left_column_tab1():
                     children=[
                         dbc.Row(children=[
                         dbc.Col(id="col-piramide"),
-                        def_graphic.generate_piechart('Discapacidad',get_discapacidad(df_data_ruv)),
-                        #def_graphic.generate_line_chart(),
-                        
-                        ]),
+                        ],id='upper-left-section-container'),
+                        dbc.Row(children=[
+                        dbc.Col(id='col-pie-Discapacidad'),
+                        ],id='lower-left-section-container'),
                     ]
                 )
 
@@ -276,12 +281,10 @@ def build_center_column_tab1():
                     ]
                 )
 
-
 def build_left_column_tab2():
     return dbc.Col( id="left-section-container",
                     children=[
-                        html.H6("Services Demand"), 
-                        def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1)),
+                        def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
                         def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
                     ]
                 )
@@ -315,7 +318,6 @@ def build_right_column_tab2():
 
 
 #Create Layout
-
 app.layout = html.Div(
     id="big-app-container",
     children=[
@@ -331,8 +333,8 @@ app.layout = html.Div(
     ],
 )
 
-
 # Update Functions
+
 @app.callback(
     Output("app-content", "children"),
     [Input("app-tabs", "value")],
@@ -349,10 +351,12 @@ def render_tab_content(tab_switch):
     Output("col-gener", "children"),
     Output("col-etnia", "children"),
     Output("col-map", "children"),
-    Output("col-piramide", "children"),],
-    [Input("filter-checklist", "value")],
+    Output("col-piramide", "children"),
+    Output("col-pie-Discapacidad", "children"),],
+    [Input("checklist_tab1", "value"),
+    Input("dropdown_tab1", "value"),],
 )
-def update_output(value):
+def update_output(value,value_dropdown):
     if not value:
         tmp_df = pd.DataFrame(columns=df_data_ruv.columns)
     elif 'EsVictima' in value:
@@ -361,6 +365,7 @@ def update_output(value):
         tmp_df = df_data_ruv
         for i in value:
             tmp_df = tmp_df[tmp_df[i]=='Si']
+    tmp_df = tmp_df[tmp_df.CodigoDepartamento.apply(lambda x : x in value_dropdown)]
     gener = def_graphic.build_gener(total_vic(tmp_df),
                                         total_men(tmp_df),
                                         total_women(tmp_df)                                    
@@ -368,8 +373,8 @@ def update_output(value):
     etnia = def_graphic.generate_piechart('Etnias',get_Etnia(tmp_df))
     map = def_graphic.map(get_map_info(tmp_df),geojson)
     piramide = def_graphic.generate_Stacked_barchar(tmp_df,'Piramide Poblacional')
-    return gener,etnia, map, piramide
-    # return 'You have selected "{}"'.format(value)
+    discapacidad = def_graphic.generate_piechart('Discapacidad',get_discapacidad(tmp_df))
+    return gener,etnia, map, piramide,discapacidad
 
 
 if __name__ == "__main__":
