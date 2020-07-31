@@ -257,11 +257,11 @@ drop MATERIALIZED VIEW vm_ruv_agg;
 
 create MATERIALIZED VIEW vm_ruv_agg
 as
-select trim(r.coddepocur) "CodigoDepartamento", trim(r.departamentoocurrencia) as "Departamento", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n) as "Total"
+select r.grupoedad "GrupoEdad", r.sexo "Sexo", trim(r.coddepocur) "CodigoDepartamento", trim(r.departamentoocurrencia) as "Departamento", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n) as "Total"
 from tb_ruv_agg r 
 where coddepocur not in ('00','NA')
-group by r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion 
-order by r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
+group by r.grupoedad, r.sexo, r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion 
+order by r.grupoedad, r.sexo, r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
 
 drop table tb_rips_agg;
 
@@ -312,12 +312,12 @@ drop MATERIALIZED VIEW vm_rips_agg;
 
 create MATERIALIZED VIEW vm_rips_agg
 as
-select trim(r.coddptoatencion) "CodigoDepartamento", trim(r.departamentoatencion) "Departamento", r.tipoatencion "TipoAtencion", r.capitulodx "CapituloDX", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n::int) as "Total"
+select r.sexo "Sexo", trim(r.coddptoatencion) "CodigoDepartamento", trim(r.departamentoatencion) "Departamento", r.tipoatencion "TipoAtencion", r.capitulodx "CapituloDX", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n::int) as "Total"
 from tb_rips_agg r
 where n <> 'NA'
 and coddptoatencion not in ('00','NA')
-group by r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.capitulodx, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
-order by r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.capitulodx, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
+group by r.sexo, r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.capitulodx, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
+order by r.sexo, r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.capitulodx, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
 
 
 drop table if exists tb_rips_agg_mesanno;
