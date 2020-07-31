@@ -12,6 +12,10 @@ module.exports.useMiddleware = app => {
     }));
     app.use(bodyParser.json());
 
+    const swaggerUi = require('swagger-ui-express'),
+    swaggerDocument = require('./swagger.json');
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
     app.use((req, res, next) =>{
         console.log(`recibida petición: ${req.url}`);
         next();
