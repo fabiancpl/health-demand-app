@@ -428,26 +428,39 @@ def build_right_column_tab2():
 def build_left_column_tab3():
     return dbc.Col( id="left-section-container",
                     children=[
-						def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
-                        def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
+                    html.Div(
+						dcc.Markdown('''
+							**DEPARTAMENTO:**   Beta 1
+							**EDAD:** 			Beta 2
+							**SEXO:** 			Beta 3
+							**ETNIA:** 			Beta 4
+							**DISCAPACIDAD:**   Beta 5
+			'''),
+			),
+						#def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
+                        #def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
                     ],
                 )
 
 def build_center_column_tab3():
     return dbc.Col( id="center-section-container",
                     children=[
-                            dbc.Row(id="upper-center-section-container",
-                                children=[
-                                    dbc.Col(def_graphic.build_gener(total_vic(df_data_rips1),
-                                        total_vic(df_data_rips1)/2,
-                                        total_vic(df_data_rips1)/2                                    
-                                    ),id="col-gener", width=10.00),
-                                    dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)), id="col-etnia"),
-                                ], justify="center",
-                                ),
+                            # dbc.Row(id="upper-center-section-container",
+                            #    children=[
+							#		#html.Div("PROBABILIDAD DE PARECER DE UNA ENFERMEDAD"),
+                            #        #dbc.Col(def_graphic.build_gener(total_vic(df_data_rips1),
+                            #        #    total_vic(df_data_rips1)/2,
+                            #        #    total_vic(df_data_rips1)/2                                    
+                            #        #),id="col-gener"),
+                            #        #dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)), id="col-etnia"),
+                            #    ], justify="center",
+                            #    ),
                              dbc.Row(
                                 dbc.Col(
-                                def_graphic.map(get_map_info(df_data_rips1),geojson)
+                                [
+                                html.Div("PROBABILIDAD DE PARECER DE UNA ENFERMEDAD"),
+                                def_graphic.map(get_map_info(df_data_rips1),geojson),
+                                ]
                                 , id='lower-center-section-container'
                                 ), align="center",
                                 ),
