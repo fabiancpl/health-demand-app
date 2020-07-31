@@ -287,14 +287,14 @@ def build_filters_tab3():
 					[
 						#dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
 						dbc.Col(generate_checklist_enfermedades('checklist_tab2'), id="center-section-filters"),
-					], id="Checklistandslider",
+					], id="Checklistandslidertab3",
                 ),
 				],
                 id="ripandchecklist"
                 ),
                                 
             dbc.Col(
-                generate_dropdown('dropdown_tab2'),
+                generate_dropdown_discapacidades('dropdown_tab2'),
                 id="left-section-filters"
                 ),
             ]
@@ -309,12 +309,12 @@ def generate_dropdown(id_html):
             )  
 
 def generate_dropdown_discapacidades(id_html):
-    #tmp_df = df_data_ruv.groupby(['CodigoDepartamento','Departamento'])[['Total']].sum().reset_index().drop('Total',1)
-    #tmp_df.rename(columns={tmp_df.columns[0]:'value',tmp_df.columns[1]:'label'},inplace=True)
+    tmp_df = df_data_ruv.groupby(['CodigoDepartamento','Departamento'])[['Total']].sum().reset_index().drop('Total',1)
+    tmp_df.rename(columns={tmp_df.columns[0]:'value',tmp_df.columns[1]:'label'},inplace=True)
     return dcc.Dropdown(id=id_html,
                 options=tmp_df.to_dict('records'),
                 value=tmp_df[tmp_df.columns[0]].tolist(),
-                multi=True
+                multi=False 
             )  
 
 def generate_checklist(id_html):
@@ -343,7 +343,7 @@ def generate_checklist_enfermedades(id_html):
                 value=1,
                 id=id_html,
                 labelStyle={'display': 'block'},
-                justify="center",
+                #justify="center",
             ),
          ]
     )
