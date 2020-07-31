@@ -212,8 +212,20 @@ def build_tab_2():
 
 def build_tab_3():
     return [
-            html.Div(html.H1("Under construction, excuse us. "),id='test'),
-            ]
+        dbc.Row(id="dashboard-filters", 
+            children=build_filters_tab3()
+        ),
+        dbc.Row(id="dashboar-container", 
+            children=[
+                build_left_column_tab3(),
+                build_center_column_tab3(),
+            ]),
+        ]
+
+# def build_tab_3():
+    # return [
+            # html.Div(html.H1("Under construction, excuse us. "),id='test'),
+            # ]
 
 def build_filters_tab1():
     return [                
@@ -235,6 +247,32 @@ def build_filters_tab1():
             ]
 
 def build_filters_tab2():
+    return [
+    
+			dbc.Col([
+				dbc.Row(dbc.Alert("Los Registros Individuales de Prestación de Servicios de Salud – RIPS, son\
+								   el conjunto de datos mínimos y básicos que el Sistema General de \
+								   Seguridad Social en salud requiere para los procesos de dirección, regulación \
+								   , control y soporte que sirven para restablecer politicas de salud, reformular la cobertura y mejorar la oferta de servicios de salud en el país"
+								   ,color="primary"), id="RIP-definition"),
+                
+                dbc.Row(
+					[
+						dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
+						dbc.Col(generate_checklist('checklist_tab2'), id="center-section-filters"),
+					], id="Checklistandslider",
+                ),
+				],
+                id="ripandchecklist"
+                ),
+                                
+            dbc.Col(
+                generate_dropdown('dropdown_tab2'),
+                id="left-section-filters"
+                ),
+            ]
+
+def build_filters_tab3():
     return [
     
 			dbc.Col([
@@ -357,6 +395,35 @@ def build_right_column_tab2():
                     ]        
                 )
 
+
+def build_left_column_tab3():
+    return dbc.Col( id="left-section-container",
+                    children=[
+						def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
+                        def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
+                    ],
+                )
+
+def build_center_column_tab3():
+    return dbc.Col( id="center-section-container",
+                    children=[
+                            dbc.Row(id="upper-center-section-container",
+                                children=[
+                                    dbc.Col(def_graphic.build_gener(total_vic(df_data_rips1),
+                                        total_vic(df_data_rips1)/2,
+                                        total_vic(df_data_rips1)/2                                    
+                                    ),id="col-gener", width=10.00),
+                                    dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)), id="col-etnia"),
+                                ], justify="center",
+                                ),
+                             dbc.Row(
+                                dbc.Col(
+                                def_graphic.map(get_map_info(df_data_rips1),geojson)
+                                , id='lower-center-section-container'
+                                ), align="center",
+                                ),
+                    ]        
+                )
 
 #Create Layout
 app.layout = html.Div(
