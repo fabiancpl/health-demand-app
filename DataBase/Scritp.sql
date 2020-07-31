@@ -257,11 +257,11 @@ drop MATERIALIZED VIEW vm_ruv_agg;
 
 create MATERIALIZED VIEW vm_ruv_agg
 as
-select r.grupoedad "GrupoEdad", r.sexo "Sexo", trim(r.coddepocur) "CodigoDepartamento", trim(r.departamentoocurrencia) as "Departamento", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n) as "Total"
+select r.indmuestra "IndMuestra", r.grupoedad "GrupoEdad", r.sexo "Sexo", trim(r.coddepocur) "CodigoDepartamento", trim(r.departamentoocurrencia) as "Departamento", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n) as "Total"
 from tb_ruv_agg r 
 where coddepocur not in ('00','NA')
-group by r.grupoedad, r.sexo, r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion 
-order by r.grupoedad, r.sexo, r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
+group by r.indmuestra, r.grupoedad, r.sexo, r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion 
+order by r.indmuestra, r.grupoedad, r.sexo, r.coddepocur, r.departamentoocurrencia, r.indadultomayor, r.indetnia, r.etnia, r.inddiscapacidad, r.tipoalteracion
 
 drop table tb_rips_agg;
 
