@@ -4,7 +4,7 @@ const db = require('../database.js');
 module.exports = (app, ruta) => {
     app.route(ruta)
     .get((req, res) => {
-        db.query('select "CodigoDepartamento", "Departamento", "TipoAtencion", "CapituloDX", "EsAdultoMayor", "PerteneceEtnia", "Etnia", "TieneDiscapacidad", "Discapacidad", "Total" ' + 
+        db.query('select "Sexo", "CodigoDepartamento", "Departamento", "TipoAtencion", "CapituloDX", "EsAdultoMayor", "PerteneceEtnia", "Etnia", "TieneDiscapacidad", "Discapacidad", "Total" ' + 
                  'from vm_rips_agg', null, (err, response) => {
             if (err) {
                 console.error(err);

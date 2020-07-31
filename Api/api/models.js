@@ -5,7 +5,7 @@ module.exports = (app, ruta) => {
     app.route(ruta + '/:page')
     .get((req, res) => {
         let page = req.params.page;
-        let pageSize = 100000;
+        let pageSize = 100;
         let offset = ((page-1)*pageSize);
         db.query('select personaid "PersonaId", cerebro "Cerebro", diabetes "Diabetes", hipertension "hipertension", infarto "Infarto", mental "Mental", tumor "Tumor", sexo "Sexo", ' + 
                  'etnia "Etnia", inddiscapacidad "IndDiscapacidad", indadultomayor "IndAdultomayor", indetnia "IndEtnia", fechanacimiento "FechaNacimiento", hecho "Hecho",  ' + 
