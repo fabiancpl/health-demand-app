@@ -285,8 +285,8 @@ def build_filters_tab3():
                 
                 dbc.Row(
 					[
-						dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
-						dbc.Col(generate_checklist('checklist_tab2'), id="center-section-filters"),
+						#dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
+						dbc.Col(generate_checklist_enfermedades('checklist_tab2'), id="center-section-filters"),
 					], id="Checklistandslider",
                 ),
 				],
@@ -308,6 +308,15 @@ def generate_dropdown(id_html):
                 multi=True
             )  
 
+def generate_dropdown_discapacidades(id_html):
+    #tmp_df = df_data_ruv.groupby(['CodigoDepartamento','Departamento'])[['Total']].sum().reset_index().drop('Total',1)
+    #tmp_df.rename(columns={tmp_df.columns[0]:'value',tmp_df.columns[1]:'label'},inplace=True)
+    return dcc.Dropdown(id=id_html,
+                options=tmp_df.to_dict('records'),
+                value=tmp_df[tmp_df.columns[0]].tolist(),
+                multi=True
+            )  
+
 def generate_checklist(id_html):
     return dcc.Checklist(id=id_html,
                 options=[
@@ -319,6 +328,25 @@ def generate_checklist(id_html):
                 value=['EsVictima','EsAdultoMayor', 'PerteneceEtnia', 'TieneDiscapacidad'],
                 labelStyle={'display': 'block'}
             )  
+
+def generate_checklist_enfermedades(id_html):
+    return dbc.FormGroup(
+		[
+		dbc.Label("Seleccione una enfermedad"),
+		dcc.RadioItems(
+                options=[
+                    {'label': 'Enfermedad 1', 'value': 1},
+                    {'label': 'Enfermedad 2', 'value': 2},
+                    {'label': 'Enfermedad 3', 'value': 3},
+                    {'label': 'Enfermedad n', 'value': 4}
+                ],
+                value=1,
+                id=id_html,
+                labelStyle={'display': 'block'},
+                justify="center",
+            ),
+         ]
+    )
 
 def generate_range_slider(id_html):
     return dcc.RangeSlider(
