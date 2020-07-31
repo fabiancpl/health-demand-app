@@ -198,9 +198,12 @@ def build_tab_3():
 def build_filters_tab1():
     return [                
             dbc.Col([
-				dbc.Row(dbc.Alert("Los Registros", color="primary"), id="RUV-definition"),
+				dbc.Row(dbc.Alert("El Registro Único de Víctimas (RUV) es el registro en donde se incluye las declaraciones \
+								   de víctimas,  que se maneja a través del Formato Único de Declaración (FUD), para luego \
+								   responder a esta población con la asistencia a que tienen derecho según la Ley 1448 de 2011.", color="primary"), id="RUV-definition"),
 								   
-                dbc.Row(generate_checklist('checklist_tab1'), id="center-section-filters"),
+                dbc.Row(
+                generate_checklist('checklist_tab1'), id="center-section-filters", justify="center"),
 				],
                 id="RUVandchecklist"
                 ),
@@ -218,7 +221,7 @@ def build_filters_tab2():
 				dbc.Row(dbc.Alert("Los Registros Individuales de Prestación de Servicios de Salud – RIPS, son\
 								   el conjunto de datos mínimos y básicos que el Sistema General de \
 								   Seguridad Social en salud requiere para los procesos de dirección, regulación \
-								   , control y soporte. sirven para restablecer politicas de salud, reformular la cobertura y mejorar la oferta de servicios de salud en el país"
+								   , control y soporte que sirven para restablecer politicas de salud, reformular la cobertura y mejorar la oferta de servicios de salud en el país"
 								   ,color="primary"), id="RIP-definition"),
                 
                 dbc.Row(
@@ -274,10 +277,10 @@ def build_left_column_tab1():
                     children=[
                         dbc.Row(children=[
                         dbc.Col(id="col-piramide"),
-                        ],id='upper-left-section-container'),
+                        ],id='upper-left-section-container', justify="center"),
                         dbc.Row(children=[
                         dbc.Col(id='col-pie-Discapacidad'),
-                        ],id='lower-left-section-container'),
+                        ], id='lower-left-section-container', justify="center"),
                     ]
                 )
 
@@ -286,22 +289,21 @@ def build_center_column_tab1():
                     children=[
                             dbc.Row(id="upper-center-section-container",
                                 children=[
-                                    dbc.Col(id="col-gener"),
+                                    dbc.Col(id="col-gener", width=10.00),
                                     dbc.Col(id="col-etnia"),
-                                ]),
+                                ], justify="center"),
                              dbc.Row(id='lower-center-section-container',
                                 children=[
                                 dbc.Col(id='col-map'), 
-                                ]),
+                                ], justify="center"),
                     ]
                 )
 
 def build_left_column_tab2():
     return dbc.Col( id="left-section-container",
                     children=[
-						
+						def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
                         def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
-                        def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
                     ],
                 )
 

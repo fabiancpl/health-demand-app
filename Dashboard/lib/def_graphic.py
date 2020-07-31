@@ -115,8 +115,8 @@ def generate_line_chart(df):
 def generate_bar_chart(df,title):
     df = df.sort_values(by=df.columns[1])
     return dcc.Graph(
-                figure= px.bar(df, x=df.columns[0], y=df.columns[1]).update_layout(title=title ,paper_bgcolor="#F8F9F9"),
-                id='Colombia_bar'
+                figure= px.bar(df, x=df.columns[0], y=df.columns[1]).update_layout(title=title ,paper_bgcolor="#F8F9F9", uniformtext_minsize=8, uniformtext_mode='hide'),
+                id='Colombia_bar',
             )
 
 def generate_violin_plot():
@@ -158,7 +158,7 @@ def generate_Stacked_barchar(df,title):
                     name = 'Men',
                     text = df_tmp[ 'Masculino' ],
                     hoverinfo = 'text',
-                    marker = dict( color = '#beaed4' )
+                    marker = dict( color = '#91b0ff' )
                    ),
             go.Bar( y = df_tmp[ 'GrupoEdad' ].astype( str ),
                    x = df_tmp[ 'Femenino' ],
@@ -166,7 +166,7 @@ def generate_Stacked_barchar(df,title):
                    name ='Women',
                    text = df_tmp[ 'Femenino' ],
                    hoverinfo = 'text',
-                   marker = dict( color = '#fdc086' )
+                   marker = dict( color = '#f23a87' )
                   ) 
            ]
 
