@@ -23,6 +23,11 @@ import time
 from app import app
 from lib import def_graphic
 
+#
+from datetime import datetime
+import os.path
+from os import path
+
 #### delete after integration
 data = [{"x": 23,"y":"CARIES DE LA DENTINA"},{    "x": 114,     "y": "HIPERTENSION"  },   {    "x": 630,     "y": "GASTRITIS"  },   {    "x": 720,     "y": "VAGINITIS"  },   {    "x": 530,     "y": "GINGIVITIS"  },   {    "x": 400,     "y": "LUMBAGO"  },   {    "x": 305,     "y": "INFECCION URINARIA"  },   {    "x": 213,     "y": "CEFALEA"  },   {    "x": 810,     "y": "DOLOR PELVICO"  }]
 df_diseases = pd.DataFrame.from_dict(data, orient='columns')
@@ -46,10 +51,25 @@ def get_data_summary(url, file):
         #print (0/0)   # Delete 
         return get_df_from_url(url,0)
     except:
+        print("json")
         with open(file, encoding='UTF-8') as f:
             data = json.load(f)
             df = pd.DataFrame.from_dict(data, orient='columns')
             df.Total = pd.to_numeric(df.Total)
+        return df
+
+def get_cachedf(resource):
+    endpoint = resource.replace('_','/')
+    now = datetime.now()
+    date = now.strftime("%Y_%m_%d")
+    full_file = f"data/{resource}_{date}.csv"
+    if path.exists(full_file):
+        print('File')
+        return pd.read_csv(full_file, delimiter='|')
+    else:
+        print('Service')
+        df = get_df_from_url(f"http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/{endpoint}",0)
+        df.to_csv(f"{full_file}",sep="|",index=False)
         return df
     
 def total_vic(df):
@@ -94,9 +114,9 @@ def load_data():
     global df_data_ruv,df_data_rips1,df_data_rips2,geojson
     with open('./data/polygon_colombia.json', encoding='UTF-8') as geo:
         geojson = json.loads(geo.read())
-    df_data_ruv = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",'./data/ruv.json')
+    df_data_ruv = get_cachedf('ruv')# get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",'./data/ruv.json')
     df_data_rips1 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/annomes",'./data/rips1.json')
-    df_data_rips2 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/",'./data/rips2.json')
+    df_data_rips2 = get_cachedf('rips')#get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/",'./data/rips2.json')
     df_data_ruv.Total = pd.to_numeric(df_data_ruv.Total)
     df_data_rips1.Total = pd.to_numeric(df_data_rips1.Total)
     df_data_rips2.Total = pd.to_numeric(df_data_rips2.Total)
