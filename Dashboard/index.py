@@ -215,7 +215,7 @@ def build_tab_2():
 def build_tab_3():
     return [
         dbc.Row(id="dashboard-filters", 
-            children=build_filters_tab3()
+            children=build_filters_tab3(),
         ),
         dbc.Row(id="dashboar-container", 
             children=[
@@ -275,7 +275,6 @@ def build_filters_tab2():
 
 def build_filters_tab3():
     return [
-    
 			dbc.Col([
 				dbc.Row(dbc.Alert("Los Registros Individuales de Prestación de Servicios de Salud – RIPS, son\
 								   el conjunto de datos mínimos y básicos que el Sistema General de \
@@ -285,18 +284,22 @@ def build_filters_tab3():
                 
                 dbc.Row(
 					[
-						#dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
+				#		#dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
 						dbc.Col(generate_checklist_enfermedades('checklist_tab2'), id="center-section-filters"),
+						dbc.Col(dbc.Alert("% Victim people",color="primary"), id="porcentajeVP"),
+						dbc.Col(dbc.Alert("% Factor 1",color="primary"), id="porcentaje1"),
+						dbc.Col(dbc.Alert("% Factor 2",color="primary"), id="porcentaje2"),
+						dbc.Col(dbc.Alert("% Factor 3",color="primary"), id="porcentaje3"),
 					], id="Checklistandslidertab3",
                 ),
 				],
                 id="ripandchecklist"
                 ),
                                 
-            dbc.Col(
-                generate_dropdown_discapacidades('dropdown_tab2'),
-                id="left-section-filters"
-                ),
+            #dbc.Col(
+            #    generate_dropdown_discapacidades('dropdown_tab2'),
+            #    id="left-section-filters"
+            #    ),
             ]
 
 def generate_dropdown(id_html):
@@ -434,15 +437,17 @@ def build_right_column_tab2():
 def build_left_column_tab3():
     return dbc.Col( id="left-section-container",
                     children=[
-                    html.Div(
-						dcc.Markdown('''
-							**DEPARTAMENTO:**   Beta 1
-							**EDAD:** 			Beta 2
-							**SEXO:** 			Beta 3
-							**ETNIA:** 			Beta 4
-							**DISCAPACIDAD:**   Beta 5
-			'''),
-			),
+							html.Img(id="mosaic", src=app.get_asset_url("mosaic.png"), style={'height':'50%', 'width':'70%'}),
+							#html.Div(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)),),
+            #        html.Div(
+			#			dcc.Markdown('''
+			#				**DEPARTAMENTO:**   Beta 1
+			#				**EDAD:** 			Beta 2
+			#				**SEXO:** 			Beta 3
+			#				**ETNIA:** 			Beta 4
+			#				**DISCAPACIDAD:**   Beta 5
+			#'''),
+			#),
 						#def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
                         #def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
                     ],
@@ -461,16 +466,17 @@ def build_center_column_tab3():
                             #        #dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)), id="col-etnia"),
                             #    ], justify="center",
                             #    ),
-                             dbc.Row(
-                                dbc.Col(
-                                [
-                                html.Div("PROBABILIDAD DE PARECER DE UNA ENFERMEDAD"),
-                                def_graphic.map(get_map_info(df_data_rips1),geojson),
-                                ]
-                                , id='lower-center-section-container'
-                                ), align="center",
-                                ),
-                    ]        
+                            # dbc.Row(
+                                #dbc.Col(
+                                #[
+                                html.Img(id="treeplot", src=app.get_asset_url("tree.png"), style={'height':'80%', 'width':'80%'}),
+                                #html.Div("PROBABILIDAD DE PARECER DE UNA ENFERMEDAD"),
+                                #def_graphic.map(get_map_info(df_data_rips1),geojson),
+                                #]
+                                #, id='lower-center-section-container'
+                                #),
+                            #   ),
+                    ],  justify="center",        
                 )
 
 #Create Layout
