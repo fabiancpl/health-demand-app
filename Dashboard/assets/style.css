@@ -111,7 +111,6 @@ p {
 
 
 .banner h5 {
-  /*font-family: "Great Vibes", cursive;*/
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.1rem;
@@ -209,6 +208,7 @@ p {
   height:100%;
 }
 
+
 #lower-center-section-container{
   display: block;
   height: 70%;
@@ -260,7 +260,6 @@ p {
   align-items: left;
 }
 
-
 /* Gener -------------------------------------------------------------------------*/
 
 #gener {
@@ -290,6 +289,10 @@ p {
 #Char_line, #violin_plot #stacked_plot {
   height: 50%;
   width: 100%;
+}
+
+#row {
+  display: block;
 }
 
 #bar_h, #Colombia_bar{

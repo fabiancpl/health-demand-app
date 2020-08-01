@@ -1,0 +1,317 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Team 61 API - DS4A",
+        "description": "Analysis of the Health Service's Demand with a Differential Approach - Project Application API",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "host": "localhost:3000",
+    "basePath": "/api/priv/",
+    "tags": [
+        {
+            "name": "RUV",
+            "description": "API for information about RUV"
+        },
+        {
+            "name": "RIPS",
+            "description": "API for information about RIPS"
+        },
+        {
+            "name": "RIPSAnnoMes",
+            "description": "API for information about RIPS grouping by year and month"
+        },
+        {
+            "name": "Models",
+            "description": "API for information needed to fit models"
+        }
+    ],
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/ruv": {
+            "get": {
+                "tags": [
+                    "RUV"
+                ],
+                "summary": "Get all information about RUV",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RUV"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/rips": {
+            "get": {
+                "tags": [
+                    "RIPS"
+                ],
+                "summary": "Get all information about RIPS",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RIPS"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/rips/annomes": {
+            "get": {
+                "tags": [
+                    "RIPSAnnoMes"
+                ],
+                "summary": "Get all information about RIPS grouping by year and month",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RIPSAnnoMes"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/models/{page}": {
+            "get": {
+                "tags": [
+                    "Models"
+                ],
+                "summary": "Get all information needed to fit models",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "path",
+                        "description": "Page to return",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Models"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "RUV": {
+            "properties": {
+                "GrupoEdad": {
+                    "type": "string"
+                },
+                "Sexo": {
+                    "type": "string"
+                },
+                "CodigoDepartamento": {
+                    "type": "string"
+                },
+                "Departamento": {
+                    "type": "string"
+                },
+                "EsAdultoMayor": {
+                    "type": "string"
+                },
+                "PerteneceEtnia": {
+                    "type": "string"
+                },
+                "Etnia": {
+                    "type": "string"
+                },
+                "TieneDiscapacidad": {
+                    "type": "string"
+                },
+                "Discapacidad": {
+                    "type": "string"
+                },
+                "Total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "RIPS": {
+            "properties": {
+                "CodigoDepartamento": {
+                    "type": "string"
+                },
+                "Departamento": {
+                    "type": "string"
+                },
+                "TipoAtencion": {
+                    "type": "string"
+                },
+                "CapituloDX": {
+                    "type": "string"
+                },
+                "EsAdultoMayor": {
+                    "type": "string"
+                },
+                "PerteneceEtnia": {
+                    "type": "string"
+                },
+                "Etnia": {
+                    "type": "string"
+                },
+                "TieneDiscapacidad": {
+                    "type": "string"
+                },
+                "Discapacidad": {
+                    "type": "string"
+                },
+                "Total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "RIPSAnnoMes": {
+            "properties": {
+                "Anno": {
+                    "type": "string"
+                },
+                "Mes": {
+                    "type": "string"
+                },
+                "CodigoDepartamento": {
+                    "type": "string"
+                },
+                "Departamento": {
+                    "type": "string"
+                },
+                "TipoAtencion": {
+                    "type": "string"
+                },
+                "Total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Models": {
+            "properties": {
+                "PersonaId": {
+                    "type": "string"
+                },
+                "Cerebro": {
+                    "type": "string"
+                },
+                "Diabetes": {
+                    "type": "string"
+                },
+                "hipertension": {
+                    "type": "string"
+                },
+                "Infarto": {
+                    "type": "string"
+                },
+                "Mental": {
+                    "type": "string"
+                },
+                "Tumor": {
+                    "type": "string"
+                },
+                "Sexo": {
+                    "type": "string"
+                },
+                "Etnia": {
+                    "type": "string"
+                },
+                "IndDiscapacidad": {
+                    "type": "string"
+                },
+                "IndAdultomayor": {
+                    "type": "string"
+                },
+                "IndEtnia": {
+                    "type": "string"
+                },
+                "FechaNacimiento": {
+                    "type": "date"
+                },
+                "Hecho": {
+                    "type": "string"
+                },
+                "DepartamentoOcurrencia": {
+                    "type": "string"
+                },
+                "MuncipioOcurrencia": {
+                    "type": "string"
+                },
+                "SujetoDesc": {
+                    "type": "string"
+                },
+                "ProbableManeraMuerteViolenta": {
+                    "type": "string"
+                },
+                "ProbableManeraMuerte": {
+                    "type": "string"
+                },
+                "TipoAlteracion": {
+                    "type": "string"
+                },
+                "OrigenDiscapacidad": {
+                    "type": "string"
+                },
+                "TipoRegimen": {
+                    "type": "string"
+                },
+                "Edad": {
+                    "type": "integer"
+                },
+                "GrupoEdad": {
+                    "type": "string"
+                },
+                "CicloVida": {
+                    "type": "string"
+                },
+                "Total": {
+                    "type": "number"
+                },
+                "Consultas": {
+                    "type": "number"
+                },
+                "Hospitalizaciones": {
+                    "type": "number"
+                },
+                "ProcedimientosDeSalud": {
+                    "type": "number"
+                },
+                "Urgencias": {
+                    "type": "number"
+                },
+                "Region": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

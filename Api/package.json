@@ -1,0 +1,21 @@
+{
+  "name": "api-team61",
+  "version": "1.0.0",
+  "description": "API REST - Team 61 DS4A",
+  "main": "index.js",
+  "author": "@team61",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.3",
+    "express": "^4.15.3",
+    "jsonwebtoken": "^7.4.1",
+    "pg": "^8.2.1",
+    "rand-token": "^0.3.0",
+    "swagger-ui-express": "^4.1.4"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
