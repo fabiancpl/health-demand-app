@@ -29,6 +29,7 @@ from datetime import datetime
 import os.path
 from os import path
 
+
 # Endpoionts functions
 
 def read_json(url_in):
@@ -214,20 +215,9 @@ def build_tab_2():
 
 def build_tab_3():
     return [
-        dbc.Row(id="dashboard-filters", 
-            children=build_filters_tab3()
-        ),
-        dbc.Row(id="dashboar-container", 
-            children=[
-                build_left_column_tab3(),
-                build_center_column_tab3(),
-            ]),
-        ]
+            html.Div(html.H1("Under construction, excuse us. "),id='test'),
+            ]
 
-# def build_tab_3():
-    # return [
-            # html.Div(html.H1("Under construction, excuse us. "),id='test'),
-            # ]
 def build_filters_tab1():
     return [                
             dbc.Col([
@@ -273,32 +263,6 @@ def build_filters_tab2():
                 ),
             ]
 
-def build_filters_tab3():
-    return [
-    
-			dbc.Col([
-				dbc.Row(dbc.Alert("Los Registros Individuales de Prestación de Servicios de Salud – RIPS, son\
-								   el conjunto de datos mínimos y básicos que el Sistema General de \
-								   Seguridad Social en salud requiere para los procesos de dirección, regulación \
-								   , control y soporte que sirven para restablecer politicas de salud, reformular la cobertura y mejorar la oferta de servicios de salud en el país"
-								   ,color="primary"), id="RIP-definition"),
-                
-                dbc.Row(
-					[
-						#dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
-						dbc.Col(generate_checklist_enfermedades('checklist_tab2'), id="center-section-filters"),
-					], id="Checklistandslidertab3",
-                ),
-				],
-                id="ripandchecklist"
-                ),
-                                
-            dbc.Col(
-                generate_dropdown_discapacidades('dropdown_tab2'),
-                id="left-section-filters"
-                ),
-            ]
-
 def generate_dropdown(id_html):
     tmp_df = df_data_ruv.groupby(['CodigoDepartamento','Departamento'])[['Total']].sum().reset_index().drop('Total',1)
     tmp_df.rename(columns={tmp_df.columns[0]:'value',tmp_df.columns[1]:'label'},inplace=True)
@@ -306,15 +270,6 @@ def generate_dropdown(id_html):
                 options=tmp_df.to_dict('records'),
                 value=tmp_df[tmp_df.columns[0]].tolist(),
                 multi=True
-            )  
-
-def generate_dropdown_discapacidades(id_html):
-    tmp_df = df_data_ruv.groupby(['CodigoDepartamento','Departamento'])[['Total']].sum().reset_index().drop('Total',1)
-    tmp_df.rename(columns={tmp_df.columns[0]:'value',tmp_df.columns[1]:'label'},inplace=True)
-    return dcc.Dropdown(id=id_html,
-                options=tmp_df.to_dict('records'),
-                value=tmp_df[tmp_df.columns[0]].tolist(),
-                multi=False 
             )  
 
 def generate_checklist(id_html):
@@ -331,38 +286,16 @@ def generate_checklist(id_html):
 
 
 def generate_range_slider(id_html,df):
-    min_df = df['Anno'].astype(int).min()
-    max_df = df['Anno'].astype(int).max()
-    dict_year = {int(year): year for year in df.Anno.unique()}
     return dcc.RangeSlider(
                         id=id_html,
-                        min=min_df,
-                        max=max_df,
-                        value=[min_df,max_df],#df['year'].min(),
-                        marks=dict_year,#{2016:"2016",2017:"2017",2018:"2018",2019:"2019"},
+                        min=2016,#df['year'].min(),
+                        max=2019,#df['year'].max(),
+                        value=[2016,2019],#df['year'].min(),
+                        marks={2016:"2016",2017:"2017",2018:"2018",2019:"2019"},
                         #{str(year): str(year) for year in df['year'].unique()},
-                        step=None,
-                        allowCross=False
+                        step=None
                         )
 
-def generate_checklist_enfermedades(id_html):
-    return dbc.FormGroup(
-		[
-		dbc.Label("Seleccione una enfermedad"),
-		dcc.RadioItems(
-                options=[
-                    {'label': 'Enfermedad 1', 'value': 1},
-                    {'label': 'Enfermedad 2', 'value': 2},
-                    {'label': 'Enfermedad 3', 'value': 3},
-                    {'label': 'Enfermedad n', 'value': 4}
-                ],
-                value=1,
-                id=id_html,
-                labelStyle={'display': 'block'},
-                #justify="center",
-            ),
-         ]
-    )
 
 def build_left_column_tab1():
     return dbc.Col( id="left-section-container",
@@ -430,48 +363,6 @@ def build_right_column_tab2():
                     ]        
                 )
 
-
-def build_left_column_tab3():
-    return dbc.Col( id="left-section-container",
-                    children=[
-                    html.Div(
-						dcc.Markdown('''
-							**DEPARTAMENTO:**   Beta 1
-							**EDAD:** 			Beta 2
-							**SEXO:** 			Beta 3
-							**ETNIA:** 			Beta 4
-							**DISCAPACIDAD:**   Beta 5
-			'''),
-			),
-						#def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
-                        #def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
-                    ],
-                )
-
-def build_center_column_tab3():
-    return dbc.Col( id="center-section-container",
-                    children=[
-                            # dbc.Row(id="upper-center-section-container",
-                            #    children=[
-							#		#html.Div("PROBABILIDAD DE PARECER DE UNA ENFERMEDAD"),
-                            #        #dbc.Col(def_graphic.build_gener(total_vic(df_data_rips1),
-                            #        #    total_vic(df_data_rips1)/2,
-                            #        #    total_vic(df_data_rips1)/2                                    
-                            #        #),id="col-gener"),
-                            #        #dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)), id="col-etnia"),
-                            #    ], justify="center",
-                            #    ),
-                             dbc.Row(
-                                dbc.Col(
-                                [
-                                html.Div("PROBABILIDAD DE PARECER DE UNA ENFERMEDAD"),
-                                def_graphic.map(get_map_info(df_data_rips1),geojson),
-                                ]
-                                , id='lower-center-section-container'
-                                ), align="center",
-                                ),
-                    ]        
-                )
 
 #Create Layout
 app.layout = html.Div(
@@ -553,13 +444,13 @@ def update_output_tab1(value,value_dropdown):
     Output("col-pie-Discapacidad_tab2", "children"),],
     [Input("checklist_tab2", "value"),
     Input("dropdown_tab2", "value"),
-    Input("range_slider_tab2", "value"),
+    #Input("range_slider_tab2", "value"),
     ],  
 )
-def update_output_tab2(value,value_dropdown,value_slider):
+def update_output_tab2(value,value_dropdown):#,value_slider):
     tmp_df1 = df_data_rips1
     tmp_df1 = tmp_df1[tmp_df1['CodigoDepartamento'].apply(lambda x : x in value_dropdown)]
-    tmp_df1 = tmp_df1[(tmp_df1.Anno.astype(int)>= value_slider[0]) & (tmp_df1.Anno.astype(int) <= value_slider[1])]
+    #tmp_df1 = tmp_df1[(tmp_df1.Anno >= value_slider[0]) & (tmp_df1.Anno <= value_slider[1])]
     if not value:
         tmp_df2 = df_data_rips2
     else:

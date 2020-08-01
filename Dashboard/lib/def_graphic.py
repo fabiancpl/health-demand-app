@@ -25,8 +25,9 @@ def map(df,geojson):
     #Create the map:
     Map_Fig=px.choropleth_mapbox(df,                           #Data
                 locations=df.columns[0],                       #Column containing the identifiers used in the GeoJSON file 
-                color=df.columns[1],                           #Column giving the color intensity of the region
-                geojson=geojson,                               #The GeoJSON file
+                color=df.columns[2],                           #Column giving the color intensity of the region
+                hover_name=df.columns[1],
+		geojson=geojson,                               #The GeoJSON file
                 zoom=3.5,                                        #Zoom
                 mapbox_style="carto-positron",                 #Mapbox style, for different maps you need a Mapbox account and a token
                 center={"lat": 4.624335, "lon": -74.063644},   #Center
@@ -42,7 +43,7 @@ def map(df,geojson):
     return dcc.Graph(figure=Map_Fig,id="colombia_map") 
     #return html.P('Hola',id="colombia_map")  # delete and uncomment 
 
-def build_gener(total, men, women):
+def build_gener(total, women, men):
     return html.Div(
                 id="gener",
                 className="gener",
@@ -57,23 +58,23 @@ def build_gener(total, men, women):
                         dbc.Col(html.Img(id="man-logo", src=app.get_asset_url("man.png"))),
                     ],id="row-gener-logo"),
                     dbc.Row([
-                        dbc.Col([html.P(str(men)), html.P("Mujer ")]),
-						dbc.Col([html.P(str(women)), html.P("Hombre ")]),
+                        dbc.Col([html.P(str(women)), ]),
+						dbc.Col([html.P(str(men)), ]),
                     ],id="row-gener-values")
                                 
                 ]
             )
 
-def generate_piechart(title_df,df):
+def generate_piechart(title_df,df,id):
     return  dcc.Graph(
-                        id="piechart",
+                        id=id,
                         figure=(px.pie(df, values=df.columns[1], names=df.columns[0]).update_layout(
                             paper_bgcolor="#F8F9F9",
                             title=title_df,
                             autosize=True,           
-                            margin={"r":0,"t":30,"l":0,"b":0},
+                            #margin={"r":0,"t":30,"l":0,"b":0},
                             showlegend=False,
-                            )
+                            ).update_yaxes(automargin=True)
                         )
                     )
 
@@ -96,21 +97,20 @@ def generate_bar_h_chart(df):
                     )
 
 def generate_line_chart(df):
-    return dcc.Graph(figure=px.line(df, x=df.columns[0], y=df.columns[2], color=df.columns[1]
-            ).update_layout(
+    return dcc.Graph(figure=px.line(df, x=df.columns[0], y=df.columns[2], color=df.columns[1]).update_layout(
                             paper_bgcolor="#F8F9F9",
-                            #title="Health Demand",
                             autosize=True,           
-                            margin={"r":0,"t":50,"l":0,"b":0},
+                            #margin={"r":0,"t":0,"l":0,"b":50},
                             showlegend=True,
-                            legend=dict(
+			    height=320,
+			    legend=dict(
                                     yanchor="bottom",
                                     orientation="h",
                                     y=0.99,
                                     xanchor="left",
                                     x=0.01
                                 )
-                            ), id='Char_line')
+                            ).update_yaxes(automargin=True), id='Char_line')
 
 def generate_bar_chart(df,title):
     df = df.sort_values(by=df.columns[1])
@@ -188,4 +188,10 @@ def generate_Stacked_barchar(df,title):
                 figure=fig, id='stacked_plot'
             )
 
-    
+
+def generate_treemap(df):
+    return dcc.Graph(figure= px.treemap(df,path=[df.columns[0]],values=df.columns[1]).update_layout(
+											height=320,
+											margin={"r":0,"t":0,"l":0,"b":0},
+											paper_bgcolor="#F8F9F9",
+											autosize=True),id='treemap_plot') 

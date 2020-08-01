@@ -25,6 +25,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: 0 6rem;
 }
 
@@ -110,7 +111,6 @@ p {
 
 
 .banner h5 {
-  font-family: "Great Vibes", cursive;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.1rem;
@@ -208,12 +208,6 @@ p {
   height:100%;
 }
 
-#lower-left-section-container , #upper-left-section-container {
-	height: 50%;
-	width: 100%;
-	display: block;
-    align-items: center;
-}
 
 #lower-center-section-container{
   display: block;
@@ -229,6 +223,22 @@ p {
   width: 100%;
 }
 
+#upper-left-section-container {
+  height: 45%;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+#lower-left-section-container {
+  height: 40%;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
 #col-etnia {
   height: 100%;
   width: 40%;
@@ -237,8 +247,15 @@ p {
   top: 0;
 }
 
-#piechart {
+#piechart3 , #piechart1 {
   height: 20rem;  /*This should not be here?*/
+  display: block;
+  align-items: left;
+}
+
+
+#piechart2 {
+  height: 40rem;  /*This should not be here?*/
   display: block;
   align-items: left;
 }
@@ -269,7 +286,7 @@ p {
   justify-content: center;
 }
 
-#Char_line, #violin_plot, #stacked_plot  {
+#Char_line, #violin_plot #stacked_plot {
   height: 50%;
   width: 100%;
 }
