@@ -15,7 +15,7 @@ module.exports = (app, ruta) => {
                  'urgencias "Urgencias", region "Region" ' + 
                  'from tb_modelos ' +
                  'where total <= 30 ' +
-                 'order by random() ' + 
+                 'order by random_order ' + 
                  'offset ' + offset + ' limit ' +  pageSize, null, (err, response) => {
             if (err) {
                 console.error(err);

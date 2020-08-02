@@ -202,7 +202,8 @@ CREATE TABLE tb_modelos (
   HOSPITALIZACIONES DOUBLE PRECISION,
   PROCEDIMIENTOS_DE_SALUD DOUBLE PRECISION,
   URGENCIAS DOUBLE PRECISION,
-  Region VARCHAR(32)
+  Region VARCHAR(32),
+  random_order float
 );
 
 comment on table tb_ruv_agg is
