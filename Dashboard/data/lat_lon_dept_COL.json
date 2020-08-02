@@ -1,0 +1,201 @@
+[{
+		"CodigoDepartamento": "5",
+		"Departamento": "ANTIOQUIA",
+		"Lat": "-75.581713332",
+		"Lon": "6.246715564"
+	},
+	{
+		"CodigoDepartamento": "8",
+		"Departamento": "ATLÁNTICO",
+		"Lat": "-74.7952590482",
+		"Lon": "10.9759268186"
+	},
+	{
+		"CodigoDepartamento": "11",
+		"Departamento": "BOGOTÁ, D.C.",
+		"Lat": "-74.1073590032",
+		"Lon": "4.65017303026"
+	},
+	{
+		"CodigoDepartamento": "13",
+		"Departamento": "BOLÍVAR",
+		"Lat": "-75.496431028",
+		"Lon": "10.3849855226"
+	},
+	{
+		"CodigoDepartamento": "15",
+		"Departamento": "BOYACÁ",
+		"Lat": "-73.3554887287",
+		"Lon": "5.53995323795"
+	},
+	{
+		"CodigoDepartamento": "17",
+		"Departamento": "CALDAS",
+		"Lat": "-75.4910489848",
+		"Lon": "5.05768819705"
+	},
+	{
+		"CodigoDepartamento": "18",
+		"Departamento": "CAQUETÁ",
+		"Lat": "-75.6085604324",
+		"Lon": "1.6179229304"
+	},
+	{
+		"CodigoDepartamento": "19",
+		"Departamento": "CAUCA",
+		"Lat": "-76.5740646841",
+		"Lon": "2.48250339062"
+	},
+	{
+		"CodigoDepartamento": "20",
+		"Departamento": "CESAR",
+		"Lat": "-73.259389309",
+		"Lon": "10.4604812152"
+	},
+	{
+		"CodigoDepartamento": "23",
+		"Departamento": "CÓRDOBA",
+		"Lat": "-75.8755779091",
+		"Lon": "8.7451325909"
+	},
+	{
+		"CodigoDepartamento": "25",
+		"Departamento": "CUNDINAMARCA",
+		"Lat": "-74.6692177783",
+		"Lon": "4.37531201654"
+	},
+	{
+		"CodigoDepartamento": "27",
+		"Departamento": "CHOCÓ",
+		"Lat": "-76.6259693555",
+		"Lon": "5.69219518726"
+	},
+	{
+		"CodigoDepartamento": "41",
+		"Departamento": "HUILA",
+		"Lat": "-75.2777225856",
+		"Lon": "2.93560441491"
+	},
+	{
+		"CodigoDepartamento": "44",
+		"Departamento": "LA GUAJIRA",
+		"Lat": "-72.911488911",
+		"Lon": "11.5287513839"
+	},
+	{
+		"CodigoDepartamento": "47",
+		"Departamento": "MAGDALENA",
+		"Lat": "-74.1908941206",
+		"Lon": "11.2294335041"
+	},
+	{
+		"CodigoDepartamento": "50",
+		"Departamento": "META",
+		"Lat": "-73.6270920374",
+		"Lon": "4.12386149961"
+	},
+	{
+		"CodigoDepartamento": "52",
+		"Departamento": "NARIÑO",
+		"Lat": "-77.2785763476",
+		"Lon": "1.21212436525"
+	},
+	{
+		"CodigoDepartamento": "54",
+		"Departamento": "NORTE DE SANTANDER",
+		"Lat": "-72.5082561962",
+		"Lon": "7.90530629465"
+	},
+	{
+		"CodigoDepartamento": "63",
+		"Departamento": "QUINDÍO",
+		"Lat": "-75.6807507586",
+		"Lon": "4.53598950231"
+	},
+	{
+		"CodigoDepartamento": "66",
+		"Departamento": "RISARALDA",
+		"Lat": "-75.7171230555",
+		"Lon": "4.80568026503"
+	},
+	{
+		"CodigoDepartamento": "68",
+		"Departamento": "SANTANDER",
+		"Lat": "-73.1325981781",
+		"Lon": "7.11626727561"
+	},
+	{
+		"CodigoDepartamento": "70",
+		"Departamento": "SUCRE",
+		"Lat": "-75.3954835627",
+		"Lon": "9.30233310439"
+	},
+	{
+		"CodigoDepartamento": "73",
+		"Departamento": "TOLIMA",
+		"Lat": "-75.1937147765",
+		"Lon": "4.43960899136"
+	},
+	{
+		"CodigoDepartamento": "76",
+		"Departamento": "VALLE DEL CAUCA",
+		"Lat": "-76.5215651508",
+		"Lon": "3.41441430458"
+	},
+	{
+		"CodigoDepartamento": "81",
+		"Departamento": "ARAUCA",
+		"Lat": "-70.7463503062",
+		"Lon": "7.07735854436"
+	},
+	{
+		"CodigoDepartamento": "85",
+		"Departamento": "CASANARE",
+		"Lat": "-72.396915159",
+		"Lon": "5.3276126513"
+	},
+	{
+		"CodigoDepartamento": "86",
+		"Departamento": "PUTUMAYO",
+		"Lat": "-76.650271415",
+		"Lon": "1.15229611807"
+	},
+	{
+		"CodigoDepartamento": "88",
+		"Departamento": "ARCHIPIÉLAGO DE SAN ANDRÉS, PROVIDENCIA Y SANTA CATALINA",
+		"Lat": "-81.6960629797",
+		"Lon": "12.5830136907"
+	},
+	{
+		"CodigoDepartamento": "91",
+		"Departamento": "AMAZONAS",
+		"Lat": "-69.9414267076",
+		"Lon": "-4.19983693453"
+	},
+	{
+		"CodigoDepartamento": "94",
+		"Departamento": "GUAINÍA",
+		"Lat": "-67.9188368372",
+		"Lon": "3.86616161896"
+	},
+	{
+		"CodigoDepartamento": "95",
+		"Departamento": "GUAVIARE",
+		"Lat": "-72.6389862155",
+		"Lon": "2.56642839915"
+	},
+	{
+		"CodigoDepartamento": "97",
+		"Departamento": "VAUPÉS",
+		"Lat": "-70.2347505205",
+		"Lon": "1.25119056329"
+	},
+	{
+		"CodigoDepartamento": "99",
+		"Departamento": "VICHADA",
+		"Lat": "-67.4869969956",
+		"Lon": "6.18686418683"
+	}
+]
+
+

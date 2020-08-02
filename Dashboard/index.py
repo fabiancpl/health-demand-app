@@ -19,9 +19,11 @@ import datetime as dt
 import pandas as pd
 import urllib.request, json 
 import time
+from statsmodels.graphics.mosaicplot import mosaic #library for mosaic
+import matplotlib.pyplot as plt
 
 #Recall app
-from app import app
+from app import app_load
 from lib import def_graphic
 
 #
@@ -66,13 +68,13 @@ def get_cachedf(resource):
         return df
     
 def total_vic(df):
-    return df.Total.sum()
+    return f'{df.Total.sum():,}'
 
 def total_men(df):
-    return df[df['Sexo']=='Masculino'].Total.sum()
+    return f'{df[df["Sexo"]=="Masculino"].Total.sum():,}'
 
 def total_women(df):
-    return df[df['Sexo']=='Femenino'].Total.sum()
+    return f'{df[df["Sexo"]=="Femenino"].Total.sum():,}'
 
 def get_Etnia(df):
     df_tmp = df.Etnia.value_counts().to_frame().reset_index()
@@ -102,22 +104,47 @@ def get_TipoAtencion(df):
     return df_tmp;
 
 
-def getPromedio_Acceso():
-    conteoRUV = df_data_ruv[df_data_ruv['IndMuestra']==1]
-    conteoRUV = conteoRUV.groupby(['IndMuestra','IndAdultoMayor'])['Total'].sum().reset_index()
-    conteoRUV = conteoRUV[conteoRUV['IndMuestra']== 1]
-    #return promedio, acceso
+def get_over_map_info(df_l, df):
+    df_lat = df_l[['CodigoDepartamento','Lat','Lon']].copy()   
+    df.CodigoDepartamento = pd.to_numeric(df.CodigoDepartamento)
+    df_lat.CodigoDepartamento = pd.to_numeric(df_lat.CodigoDepartamento)
+    tmp_df = df_lat.join(df.set_index('CodigoDepartamento'), on='CodigoDepartamento')
+    return tmp_df
+
+def get_promedio_categoria(df, category):
+    tmp_df = df [df.Categoria == category][['AnnoAtencion','Subcategoria','Promedio']]	
+    tmp_df = tmp_df.sort_values(by=[tmp_df.columns[0]])
+    return tmp_df
 
 # Load Data
+
+def load_model_info(resource):
+    full_file = f"{resource}.csv"
+    if path.exists(full_file):
+        return pd.read_csv(full_file, delimiter='|')
+    else:
+        df = get_df_from_url("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/models/1",0)
+    #for n in range(2,3):
+    #    df1 = get_df_from_url(f"http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/models/{n}",0)
+    #    df = pd.concat([df, df1], axis=0)
+        print (df.shape)
+        return df.head(50000)
+
 def load_data():
+    
     start = time.time()
     # Data
-    global df_data_ruv,df_data_rips1,df_data_rips2,geojson
+    global df_data_ruv,df_data_rips1,df_data_rips2,geojson,df_lat_lon_col,df_promediodeptos,df_promed_cat,df_model
     with open('./data/polygon_colombia.json', encoding='UTF-8') as geo:
         geojson = json.loads(geo.read())
     df_data_ruv = get_cachedf('ruv')# get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/ruv",'./data/ruv.json')
     df_data_rips1 = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/annomes",'./data/rips1.json')
     df_data_rips2 = get_cachedf('rips')#get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/",'./data/rips2.json')
+    df_lat_lon_col = get_data_summary('','./data/lat_lon_dept_COL.json')
+    df_promediodeptos = get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/promediodeptos",'./data/promediosdeptos.json')
+    df_promed_cat =  get_data_summary("http://ec2-3-129-71-228.us-east-2.compute.amazonaws.com/api/priv/rips/usopromedio",'./data/promedios.json')
+    df_model = load_model_info('models')
+
     df_data_ruv.Total = pd.to_numeric(df_data_ruv.Total)
     df_data_rips1.Total = pd.to_numeric(df_data_rips1.Total)
     df_data_rips2.Total = pd.to_numeric(df_data_rips2.Total)
@@ -136,15 +163,15 @@ def build_title():
             html.Div(
                 id="banner-text",
                 children=[
-                    html.H5("Analysis of the Health Service’s Demand with a Differential Approach"),
-                    html.H6("Exploratory Data Analysis and Prediction Model."),
+                    html.H5("Análisis de la Demanda de los Servicios de Salud con un Enfoque Diferencial"),
+                    html.H6("Análisis exploratorio y modelamiento de los datos."),
                 ],
             ),
             html.Div(
                 id="banner-logo",
                 children=[
                     #html.Img(id="logo", src=app.get_asset_url("DS4A_latam_logo.png")),
-                    html.Img(id="logo", src=app.get_asset_url("ministeriodesaludlogo.png"), style={'height':'100%', 'width':'100%'}),
+                    html.Img(id="logo", src=app_load.get_asset_url("ministeriodesaludlogo.png"), style={'height':'100%', 'width':'100%'}),
                 ],
             ),
         ],
@@ -157,7 +184,7 @@ def build_tabs():
         children=[
             dcc.Tabs(
                 id="app-tabs",
-                value="tab1",
+                value="tab3",
                 className="custom-tabs",
                 children=[
                     dcc.Tab(
@@ -175,9 +202,16 @@ def build_tabs():
                         selected_className="custom-tab--selected",
                     ),
                     dcc.Tab(
-                        id="Model-tab",
-                        label="Predition Model",
+                        id="Model-tab1",
+                        label="Demanda Servicios",
                         value="tab3",
+                        className="custom-tab",
+                        selected_className="custom-tab--selected",
+                    ),
+                    dcc.Tab(
+                        id="Model-tab2",
+                        label="Probabilidad Enfermedad",
+                        value="tab4",
                         className="custom-tab",
                         selected_className="custom-tab--selected",
                     ),
@@ -221,6 +255,18 @@ def build_tab_3():
             children=[
                 build_left_column_tab3(),
                 build_center_column_tab3(),
+            ]),
+        ]
+
+def build_tab_4():
+    return [
+        dbc.Row(id="dashboard-filters", 
+            children=build_filters_tab4()
+        ),
+        dbc.Row(id="dashboar-container", 
+            children=[
+                build_left_column_tab4(),
+                #build_center_column_tab4(),
             ]),
         ]
 
@@ -274,30 +320,30 @@ def build_filters_tab2():
             ]
 
 def build_filters_tab3():
-    return [
-    
-			dbc.Col([
-				dbc.Row(dbc.Alert("Los Registros Individuales de Prestación de Servicios de Salud – RIPS, son\
-								   el conjunto de datos mínimos y básicos que el Sistema General de \
-								   Seguridad Social en salud requiere para los procesos de dirección, regulación \
-								   , control y soporte que sirven para restablecer politicas de salud, reformular la cobertura y mejorar la oferta de servicios de salud en el país"
-								   ,color="primary"), id="RIP-definition"),
+    return [dbc.Col([
+		dbc.Row(dbc.Alert("Algunas enfermedades o morbilidades son más relevantes para el sistema de salud porque son algunas de las principales causas de mortalidad en Colombia a través de los años. Estas son diabetes, hipertensión, cáncer, ataque cardíaco y enfermedades cerebrovasculares."
+		,color="primary"), id="RIP-definition"),
                 
-                dbc.Row(
-					[
-						#dbc.Col(generate_range_slider('range_slider_tab2'), id="right-section-filters"),
-						dbc.Col(generate_checklist_enfermedades('checklist_tab2'), id="center-section-filters"),
-					], id="Checklistandslidertab3",
-                ),
-				],
-                id="ripandchecklist"
-                ),
-                                
-            dbc.Col(
-                generate_dropdown_discapacidades('dropdown_tab2'),
-                id="left-section-filters"
-                ),
+               # dbc.Row([
+		#	dbc.Col(generate_checklist_enfermedades('checklist_tab2'), id="center-section-filters"),
+		#	], id="Checklistandslidertab3",
+                #),
+		],id="ripandchecklist"
+             ),
+             dbc.Col([html.P('Población de Interes'),
+			 generate_dropdown_one_option('dropdown_tab3')],id="left-section-filters"),
             ]
+
+def build_filters_tab4():
+    return [dbc.Col([
+		dbc.Row(dbc.Alert("La salud mental también se considera importante para el análisis debido a los riesgos asociados a los hechos de victimización de este tipo de población. En este sentido, determinar la probabilidad de desarrollar una de estas enfermedades a partir de los atributos sociodemográficos y las comorbilidades puede ser útil para impulsar la creación de políticas públicas de prevención y tratamiento en las víctimas y el público en general."
+		,color="primary"), id="RIP-definition"),
+		],id="ripandchecklist"
+             ),
+             dbc.Col([html.P('Enfermedades'),
+			 generate_dropdown_mode2('dropdown_tab4')],id="left-section-filters"),
+            ]
+
 
 def generate_dropdown(id_html):
     tmp_df = df_data_ruv.groupby(['CodigoDepartamento','Departamento'])[['Total']].sum().reset_index().drop('Total',1)
@@ -308,22 +354,40 @@ def generate_dropdown(id_html):
                 multi=True
             )  
 
-def generate_dropdown_discapacidades(id_html):
-    tmp_df = df_data_ruv.groupby(['CodigoDepartamento','Departamento'])[['Total']].sum().reset_index().drop('Total',1)
-    tmp_df.rename(columns={tmp_df.columns[0]:'value',tmp_df.columns[1]:'label'},inplace=True)
+def generate_dropdown_one_option(id_html):
     return dcc.Dropdown(id=id_html,
-                options=tmp_df.to_dict('records'),
-                value=tmp_df[tmp_df.columns[0]].tolist(),
-                multi=False 
-            )  
+                options=[
+                    {'label': ' Victimas', 'value': 'EsVictima'},
+                    {'label': ' Adulto Mayor', 'value': 'EsAdultoMayor'},
+                    {'label': ' Pertenece Etnia', 'value': 'PerteneceEtnia'},
+                    {'label': ' Tiene Discapacidad', 'value': 'TieneDiscapacidad'}
+                ],
+                value='EsVictima',
+                multi=False,
+	       	clearable=False
+            ) 
+
+def generate_dropdown_mode2(id_html):
+    return dcc.Dropdown(id=id_html,
+                options=[
+                    {'label': ' Hipertension', 'value': 'hipertension'},
+                    {'label': ' Cerebro', 'value': 'cerebro'},
+                    {'label': ' Diabetes', 'value': 'diabetes'},
+                    {'label': ' Infarto', 'value': 'infarto'},
+                    {'label': ' Mental', 'value': 'mental'},
+                    {'label': ' Tumor', 'value': 'tumor'}
+                ],
+                value='hipertension',
+                multi=False,
+				clearable=False
+            ) 
 
 def generate_checklist(id_html):
     return dcc.Checklist(id=id_html,
                 options=[
-                    #{'label': ' Victims', 'value': 'EsVictima'},
-                    {'label': ' Oldest', 'value': 'EsAdultoMayor'},
-                    {'label': ' With Ethnicity', 'value': 'PerteneceEtnia'},
-                    {'label': ' With Dishabilities', 'value': 'TieneDiscapacidad'}
+                    {'label': ' Adulto Mayor', 'value': 'EsAdultoMayor'},
+                    {'label': ' Pertenece Etnia', 'value': 'PerteneceEtnia'},
+                    {'label': ' Tiene Discapacidad', 'value': 'TieneDiscapacidad'}
                 ],
                 value=[],
                 labelStyle={'display': 'block'}
@@ -339,30 +403,10 @@ def generate_range_slider(id_html,df):
                         min=min_df,
                         max=max_df,
                         value=[min_df,max_df],#df['year'].min(),
-                        marks=dict_year,#{2016:"2016",2017:"2017",2018:"2018",2019:"2019"},
-                        #{str(year): str(year) for year in df['year'].unique()},
+                        marks=dict_year,
                         step=None,
                         allowCross=False
                         )
-
-def generate_checklist_enfermedades(id_html):
-    return dbc.FormGroup(
-		[
-		dbc.Label("Seleccione una enfermedad"),
-		dcc.RadioItems(
-                options=[
-                    {'label': 'Enfermedad 1', 'value': 1},
-                    {'label': 'Enfermedad 2', 'value': 2},
-                    {'label': 'Enfermedad 3', 'value': 3},
-                    {'label': 'Enfermedad n', 'value': 4}
-                ],
-                value=1,
-                id=id_html,
-                labelStyle={'display': 'block'},
-                #justify="center",
-            ),
-         ]
-    )
 
 def build_left_column_tab1():
     return dbc.Col( id="left-section-container",
@@ -381,14 +425,14 @@ def build_center_column_tab1():
                     children=[
                             dbc.Row(id="upper-center-section-container",
                                 children=[
-                                    dbc.Col(id="col-gener", width=10.00),
-                                    dbc.Col(id="col-etnia"),
+                                    dbc.Col(id="col-gener", align='Center'),
+                                    dbc.Col(id="col-etnia", align="center"),
                                 ], justify="center"),
                              dbc.Row(id='lower-center-section-container',
                                 children=[
                                 dbc.Col(id='col-map'), 
                                 ], justify="center"),
-                    ]
+                    ],align='center'
                 )
 
 def build_left_column_tab2():
@@ -424,57 +468,54 @@ def build_center_column_tab2():
 def build_right_column_tab2():
     return dbc.Col( id="right-section-container",
                     children=[
-                        def_graphic.generate_violin_plot(),
                         html.H6("Top Diseases"), 
-                        def_graphic.generate_bar_h_chart(df_diseases),
                     ]        
                 )
 
 
 def build_left_column_tab3():
-    return dbc.Col( id="left-section-container",
+    return dbc.Col( id="left-section-container-model",
                     children=[
-                    html.Div(
-						dcc.Markdown('''
-							**DEPARTAMENTO:**   Beta 1
-							**EDAD:** 			Beta 2
-							**SEXO:** 			Beta 3
-							**ETNIA:** 			Beta 4
-							**DISCAPACIDAD:**   Beta 5
-			'''),
-			),
-						#def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(df_data_rips1)),
-                        #def_graphic.generate_bar_chart(get_TipoAtencion(df_data_rips1),'Tipo Atencion'),
-                    ],
-                )
+
+                                dbc.Row(id='model-Sexo'),
+                                dbc.Row(id='model-Ciclovida'),
+                                dbc.Row(id='model-Etnia'),
+                                dbc.Row(id='model-OrigenDiscapacidad'),
+                                dbc.Row(id='model-Enfermedad'),
+                        ])
 
 def build_center_column_tab3():
-    return dbc.Col( id="center-section-container",
+    return dbc.Col( id="center-section-container-model",
                     children=[
-                            # dbc.Row(id="upper-center-section-container",
-                            #    children=[
-							#		#html.Div("PROBABILIDAD DE PARECER DE UNA ENFERMEDAD"),
-                            #        #dbc.Col(def_graphic.build_gener(total_vic(df_data_rips1),
-                            #        #    total_vic(df_data_rips1)/2,
-                            #        #    total_vic(df_data_rips1)/2                                    
-                            #        #),id="col-gener"),
-                            #        #dbc.Col(def_graphic.generate_piechart('Etnia',get_Etnia(df_data_rips2)), id="col-etnia"),
-                            #    ], justify="center",
-                            #    ),
                              dbc.Row(
                                 dbc.Col(
                                 [
-                                html.Div("PROBABILIDAD DE PARECER DE UNA ENFERMEDAD"),
-                                def_graphic.map(get_map_info(df_data_rips1),geojson),
+                                html.Div("Modelamiento de la Demanda de Servicios de Salud \n"),
                                 ]
                                 , id='lower-center-section-container'
-                                ), align="center",
-                                ),
+                                ),align="center"),
+					dbc.Row(html.Img(id="model_img"))
                     ]        
                 )
 
+
+def build_left_column_tab4():
+    return dbc.Col( #id="left-section-container-model",
+                    children=[
+                        #dbc.Row(children=[
+								html.P(id='col-text'),
+                        		dbc.Row(html.Img(id="model_img_model2_2"), justify="center"),
+                        #],id='upper-left-section-container', justify="center"
+						#),
+                        #dbc.Row(children=[
+								dbc.Row(html.Img(id="model_img_model2_1")),
+                        #], id='lower-left-section-container', justify="center"
+						#),
+                    ]
+                )
+
 #Create Layout
-app.layout = html.Div(
+app_load.layout = html.Div(
     id="big-app-container",
     children=[
     build_title(),
@@ -502,7 +543,7 @@ app.layout = html.Div(
 
 # Update Functions
 
-@app.callback(
+@app_load.callback(
     Output("app-content", "children"),
     [Input("app-tabs", "value")],
 )
@@ -511,10 +552,12 @@ def render_tab_content(tab_switch):
         return build_tab_1()
     elif tab_switch == "tab2":
         return build_tab_2()
-    else:
+    elif tab_switch == "tab3":
         return build_tab_3()
+    else:
+        return build_tab_4()
 
-@app.callback([
+@app_load.callback([
     Output("col-gener", "children"),
     Output("col-etnia", "children"),
     Output("col-map", "children"),
@@ -525,8 +568,6 @@ def render_tab_content(tab_switch):
 )
 def update_output_tab1(value,value_dropdown):
     if not value:
-    #    tmp_df = pd.DataFrame(columns=df_data_ruv.columns)
-    #elif 'EsVictima' in value:
         tmp_df = df_data_ruv
     else:
         tmp_df = df_data_ruv
@@ -538,14 +579,14 @@ def update_output_tab1(value,value_dropdown):
                                         total_men(tmp_df)                                    
                                     )
     etnia = def_graphic.generate_piechart('Etnias',get_Etnia(tmp_df),'piechart1')
-    map = def_graphic.map(get_map_info(tmp_df),geojson)
+    map = def_graphic.map(get_map_info(tmp_df),geojson,get_over_map_info(df_lat_lon_col,df_promediodeptos),'Victimas x1000 Habitantes:')
     piramide = def_graphic.generate_Stacked_barchar(tmp_df,'Piramide Poblacional')
     discapacidad = def_graphic.generate_piechart('Discapacidad',get_discapacidad(tmp_df),'piechart2')
     return gener,etnia, map, piramide,discapacidad
 
 
 
-@app.callback([
+@app_load.callback([
     Output("col-gener_tab2", "children"),
     Output("col-etnia_tab2", "children"),
     Output("col-map_tab2", "children"),
@@ -560,6 +601,10 @@ def update_output_tab2(value,value_dropdown,value_slider):
     tmp_df1 = df_data_rips1
     tmp_df1 = tmp_df1[tmp_df1['CodigoDepartamento'].apply(lambda x : x in value_dropdown)]
     tmp_df1 = tmp_df1[(tmp_df1.Anno.astype(int)>= value_slider[0]) & (tmp_df1.Anno.astype(int) <= value_slider[1])]
+
+    tmp_df3 = df_promed_cat
+    tmp_df3 = tmp_df3[(tmp_df3.AnnoAtencion.astype(int)>= value_slider[0]) & (tmp_df3.AnnoAtencion.astype(int) <= value_slider[1])]
+
     if not value:
         tmp_df2 = df_data_rips2
     else:
@@ -575,13 +620,72 @@ def update_output_tab2(value,value_dropdown,value_slider):
                                         total_men(tmp_df2)
                                     )
     etnia = def_graphic.generate_piechart('Etnias',get_Etnia(tmp_df2),'piechart3')
-    map = def_graphic.map(get_map_info(tmp_df1),geojson)        
+    map = def_graphic.map(get_map_info(tmp_df1),geojson,get_over_map_info(df_lat_lon_col,df_promediodeptos),'Uso Promedio:')        
     piramide = def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(tmp_df1))
-    discapacidad = def_graphic.generate_treemap(get_TipoAtencion(tmp_df1))
+    #discapacidad = def_graphic.generate_treemap(get_TipoAtencion(tmp_df1))
+
+    discapacidad = def_graphic.generate_line_chart(get_promedio_categoria(tmp_df3,'ADULTOMAYOR'))    
+
+
     return gener,etnia, map, piramide,discapacidad    
+
+
+@app_load.callback([
+    Output("model_img", "src"),
+    Output("model-Sexo", "children"),
+    Output("model-Ciclovida", "children"),
+    Output("model-Etnia", "children"),
+    Output("model-OrigenDiscapacidad", "children"),
+    Output("model-Enfermedad", "children"),],
+    [Input("dropdown_tab3", "value"),],
+)
+def update_output_tab3(value):
+    if value=='EsVictima':
+        tmp_df = df_model 
+    else:
+        tmp_df = df_model
+        tmp_df.rename(columns={'IndDiscapacidad':'TieneDiscapacidad','IndAdultomayor':'EsAdultoMayor','IndEtnia':'PerteneceEtnia'},inplace=True)
+        tmp_df = tmp_df[tmp_df[value]=='Si']
+
+    Sexo = def_graphic.generate_violin_plot(tmp_df,'Sexo')
+    CicloVida = def_graphic.generate_violin_plot(tmp_df,'CicloVida')
+    Etnia = def_graphic.generate_violin_plot(tmp_df,'Etnia')
+    OrigenDiscapacidad = def_graphic.generate_violin_plot(tmp_df,'OrigenDiscapacidad')
+    Enfermedad = def_graphic.generate_violin_plot(tmp_df,'Diabetes')
+    if not value:	
+        img = app_load.get_asset_url("m1_GeneralModel.png")
+    elif value=='TieneDiscapacidad':
+        img = app_load.get_asset_url("m1_DisabilityModel.png")
+    elif value=='EsAdultoMayor':
+        img = app_load.get_asset_url("m1_ElderlyModel.png")
+    else: 
+        img = app_load.get_asset_url("m1_EthnicModel.png") 
+    return img,Sexo, CicloVida, Etnia,OrigenDiscapacidad,Enfermedad
+
+
+@app_load.callback([
+    Output("col-text", "children"),
+    Output("model_img_model2_1", "src"),
+    Output("model_img_model2_2", "src"),],
+    [Input("dropdown_tab4", "value"),],
+)
+def update_output_tab4(value):
+
+    tmp_dict = {
+		'hipertension': 13.26,
+		'cerebro': 0.7,
+		'diabetes': 4.21,
+		'infarto': 1.15,
+		'mental': 6.09,
+		'tumor': 2.1 }
+    text = "   Probabilidad de la Enfermedad: "+ value + "  "+str(tmp_dict.get(value)) + "%"
+    img1 = app_load.get_asset_url("m2_mosaic-"+value+".png") 
+    img2 = app_load.get_asset_url("m2_tree-"+value+".png")
+	
+    return text,img1,img2
 
 
 
 if __name__ == "__main__":
     load_data()
-    app.run_server(debug=True)
+    app_load.run_server(debug=True,use_reloader=False)
