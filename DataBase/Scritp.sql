@@ -301,7 +301,8 @@ CREATE TABLE if exists tb_rips_agg (
   CodDptoAtencion VARCHAR(16),
   DepartamentoAtencion VARCHAR(128),
   CodMunAtencion VARCHAR(16),
-  MunicipioAtencion VARCHAR(128)
+  MunicipioAtencion VARCHAR(128),
+  Ciclovida varchar(32)
 );
 
 comment on table tb_rips_agg is
@@ -310,7 +311,7 @@ comment on table tb_rips_agg is
 
 drop MATERIALIZED VIEW vm_rips_agg;
 
-create MATERIALIZED VIEW vm_rips_agg
+create materialized view vm_rips_agg
 as
 select r.sexo "Sexo", trim(r.coddptoatencion) "CodigoDepartamento", trim(r.departamentoatencion) "Departamento", r.tipoatencion "TipoAtencion", r.capitulodx "CapituloDX", r.indadultomayor as "EsAdultoMayor", r.indetnia as "PerteneceEtnia", r.etnia as "Etnia", r.inddiscapacidad as "TieneDiscapacidad", r.tipoalteracion as "Discapacidad", sum(n::int) as "Total"
 from tb_rips_agg r
@@ -323,7 +324,7 @@ order by r.sexo, r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.ca
 drop table if exists tb_rips_agg_mesanno;
 
 /*==============================================================*/
-/* Table: tb_rips_agg_mesanno                                           */
+/* Table: tb_rips_agg_mesanno                                   */
 /*==============================================================*/
 CREATE TABLE tb_rips_agg_mesanno (
   TipoAtencion VARCHAR(128),
@@ -331,8 +332,129 @@ CREATE TABLE tb_rips_agg_mesanno (
   mesAtencion VARCHAR(2),
   CodDptoAtencion VARCHAR(16),
   DepartamentoAtencion VARCHAR(128),
+  IndEtnia VARCHAR(128),
+  Etnia VARCHAR(128),
+  IndDiscapacidad VARCHAR(128),
+  IndAdultoMayor VARCHAR(128),
   n BIGINT
 );
 
 comment on table tb_rips_agg is
 'Contiene información agregada sobre la atención médica realizada agrupada por tipo atencion, ano, mes y departamento';
+
+drop MATERIALIZED VIEW vm_rips_agg_mesanno;
+
+create materialized view vm_rips_agg_mesanno
+as
+select r.anoatencion as "Anno", r.mesatencion as "Mes", trim(r.coddptoatencion) as "CodigoDepartamento", trim(r.departamentoatencion) as "Departamento", r.tipoatencion as "TipoAtencion", r.indetnia "PerteneceEtnia", r.inddiscapacidad "TieneDiscapacidad", r.indadultomayor "EsAdultoMayor", sum(n) as "Total"
+from tb_rips_agg_mesanno r
+where coddptoatencion not in ('00','NA')
+group by r.anoatencion, r.mesatencion, r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.indetnia, r.inddiscapacidad, r.indadultomayor
+order by r.anoatencion, r.mesatencion, r.coddptoatencion, r.departamentoatencion, r.tipoatencion, r.indetnia, r.inddiscapacidad, r.indadultomayor;
+
+drop materialized view vm_rips_agg_usopromedio;
+
+create materialized view vm_rips_agg_usopromedio
+as
+with rips as (
+  select *
+  from tb_rips_agg
+  where n <> 'NA'
+  and ciclovida <> 'NA'),
+usoprom1 as (
+  select personaid, anoatencion, ciclovida, sum(n::int) n
+  from rips a
+  group by personaid, anoatencion, ciclovida
+),
+usoprom2 as (
+  select anoatencion, ciclovida, avg(n)::double precision promedio, stddev(n)/sqrt(count(n)) error
+  from usoprom1
+  group by anoatencion, ciclovida
+)
+select 'ADULTOMAYOR' categoria, ciclovida subcategoria, anoatencion, promedio, error
+from usoprom2
+union all
+(with rips as (
+  select *
+  from tb_rips_agg
+  where n <> 'NA'),
+usoprom1 as (
+  select personaid, anoatencion, etnia, sum(n::int) n
+  from rips a
+  group by personaid, anoatencion, etnia
+),
+usoprom2 as (
+  select anoatencion, etnia, avg(n) promedio, stddev(n)/sqrt(count(n)) error
+  from usoprom1
+  group by anoatencion, etnia
+)
+select 'ETNIA' categoria, etnia, anoatencion, promedio, error
+from usoprom2)
+union all
+(with rips as (
+  select *
+  from tb_rips_agg
+  where n <> 'NA'),
+usoprom1 as (
+  select personaid, anoatencion, sexo, sum(n::int) n
+  from rips a
+  group by personaid, anoatencion, sexo
+),
+usoprom2 as (
+  select anoatencion, sexo, avg(n) promedio, stddev(n)/sqrt(count(n)) error
+  from usoprom1
+  group by anoatencion, sexo
+)
+select 'SEXO' categoria, sexo, anoatencion, promedio, error
+from usoprom2)
+union all
+(with rips as (
+  select *
+  from tb_rips_agg
+  where n <> 'NA'),
+usoprom1 as (
+  select personaid, anoatencion, inddiscapacidad, sum(n::int) n
+  from rips a
+  group by personaid, anoatencion, inddiscapacidad
+),
+usoprom2 as (
+  select anoatencion, inddiscapacidad, avg(n) promedio, stddev(n)/sqrt(count(n)) error
+  from usoprom1
+  group by anoatencion, inddiscapacidad
+)
+select 'DISCAPACIDAD' categoria, inddiscapacidad, anoatencion, promedio, error
+from usoprom2);
+
+
+
+drop materialized view vm_rips_agg_promediodptos;
+
+create materialized view vm_rips_agg_promediodptos
+as
+with rips as (
+  select *
+  from tb_rips_agg
+  where n <> 'NA'
+  and coddptoatencion not in ('00','NA')),
+usoprom1 as (
+  select personaid, anoatencion, coddptoatencion, departamentoatencion, sum(n::int) n
+  from rips a
+  group by personaid, anoatencion, coddptoatencion, departamentoatencion
+),
+usoprom2 as (
+  select anoatencion, coddptoatencion, departamentoatencion, avg(n)
+  from usoprom1
+  group by anoatencion, coddptoatencion, departamentoatencion
+),
+usoprom3 as (
+  select coddptoatencion, departamentoatencion, avg(n)::double precision promedio
+  from usoprom1
+  group by coddptoatencion, departamentoatencion
+),
+promedioannodeptos as (
+  select coddptoatencion, (sum(n::int)/6)::double precision promedioanno
+  from rips
+  group by coddptoatencion
+)
+select a.coddptoatencion, a.departamentoatencion, a.promedio, b.promedioanno
+from usoprom3 a join promedioannodeptos b on (a.coddptoatencion = b.coddptoatencion)

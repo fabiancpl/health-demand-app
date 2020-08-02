@@ -5,7 +5,7 @@ module.exports = (app, ruta) => {
     app.route(ruta)
     .get((req, res) => {
         db.query('select "IndMuestra", "GrupoEdad", "Sexo", "CodigoDepartamento", "Departamento", "EsAdultoMayor", "PerteneceEtnia", "Etnia", "TieneDiscapacidad", "Discapacidad", "Total" ' + 
-                 'from vm_ruv_agg limit 100', null, (err, response) => {
+                 'from vm_ruv_agg', null, (err, response) => {
             if (err) {
                 console.error(err);
                 res.status(500).send(err);

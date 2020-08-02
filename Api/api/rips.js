@@ -17,11 +17,34 @@ module.exports = (app, ruta) => {
     });
     app.route(ruta+"/annomes")
     .get((req, res) => {
-        db.query('select r.anoatencion as "Anno", r.mesatencion as "Mes", trim(r.coddptoatencion) as "CodigoDepartamento", trim(r.departamentoatencion) as "Departamento", r.tipoatencion as "TipoAtencion", sum(n) as "Total" ' + 
-                 'from tb_rips_agg_mesanno r ' + 
-                 'where coddptoatencion not in (\'00\',\'NA\') ' + 
-                 'group by r.anoatencion, r.mesatencion, r.coddptoatencion, r.departamentoatencion, r.tipoatencion ' + 
-                 'order by r.anoatencion, r.mesatencion, r.coddptoatencion, r.departamentoatencion, r.tipoatencion', null, (err, response) => {
+        db.query('select "Anno", "Mes", "CodigoDepartamento", "Departamento", "TipoAtencion", "PerteneceEtnia", "TieneDiscapacidad", "EsAdultoMayor", "Total" ' + 
+                 'from vm_rips_agg_mesanno', null, (err, response) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send(err);
+            } else {
+                let rows = response.rows;
+                response.rowCount > 0 ? res.json(rows) : res.status(204).send();
+            }            
+        })
+    });
+    app.route(ruta+"/usopromedio")
+    .get((req, res) => {
+        db.query('select categoria "Categoria", subcategoria "Subcategoria", anoatencion "AnnoAtencion", promedio "Promedio", error "Error" ' + 
+                 'from vm_rips_agg_usopromedio', null, (err, response) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send(err);
+            } else {
+                let rows = response.rows;
+                response.rowCount > 0 ? res.json(rows) : res.status(204).send();
+            }            
+        })
+    });
+    app.route(ruta+"/promediodeptos")
+    .get((req, res) => {
+        db.query('select coddptoatencion "CodigoDepartamento", departamentoatencion "Departamento", promedio "Promedio", promedioanno "PromedioAnno" ' + 
+                 'from vm_rips_agg_promediodptos', null, (err, response) => {
             if (err) {
                 console.error(err);
                 res.status(500).send(err);
