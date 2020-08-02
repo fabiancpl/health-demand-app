@@ -5,7 +5,7 @@ module.exports = (app, ruta) => {
     app.route(ruta + '/:page')
     .get((req, res) => {
         let page = req.params.page;
-        let pageSize = 100;
+        let pageSize = 100000;
         let offset = ((page-1)*pageSize);
         db.query('select personaid "PersonaId", cerebro "Cerebro", diabetes "Diabetes", hipertension "hipertension", infarto "Infarto", mental "Mental", tumor "Tumor", sexo "Sexo", ' + 
                  'etnia "Etnia", inddiscapacidad "IndDiscapacidad", indadultomayor "IndAdultomayor", indetnia "IndEtnia", fechanacimiento "FechaNacimiento", hecho "Hecho",  ' + 
@@ -14,6 +14,8 @@ module.exports = (app, ruta) => {
                  'grupoedad "GrupoEdad", ciclovida "CicloVida", total "Total", consultas "Consultas", hospitalizaciones "Hospitalizaciones", procedimientos_de_salud "ProcedimientosDeSalud", ' + 
                  'urgencias "Urgencias", region "Region" ' + 
                  'from tb_modelos ' +
+                 'where total <= 30 ' +
+                 'order by random_order ' + 
                  'offset ' + offset + ' limit ' +  pageSize, null, (err, response) => {
             if (err) {
                 console.error(err);

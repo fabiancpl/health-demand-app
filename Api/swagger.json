@@ -25,6 +25,14 @@
             "description": "API for information about RIPS grouping by year and month"
         },
         {
+            "name": "RIPSUsoPromedio",
+            "description": "API for information about RIPS average number of health services"
+        },
+        {
+            "name": "RIPSPromedioDeptos",
+            "description": "API for information about RIPS average number of health services by 'departamento'"
+        },
+        {
             "name": "Models",
             "description": "API for information needed to fit models"
         }
@@ -96,6 +104,44 @@
                 }
             }
         },
+        "/rips/usopromedio": {
+            "get": {
+                "tags": [
+                    "RIPSUsoPromedio"
+                ],
+                "summary": "Get all information about RIPS average number of health services",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RIPSUsoPromedio"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/rips/promediodeptos": {
+            "get": {
+                "tags": [
+                    "RIPSPromedioDeptos"
+                ],
+                "summary": "Get all information about RIPS average number of health services by 'departamento'",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RIPSPromedioDeptos"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/models/{page}": {
             "get": {
                 "tags": [
@@ -128,6 +174,9 @@
     "definitions": {
         "RUV": {
             "properties": {
+                "IndMuestra": {
+                    "type": "string"
+                },
                 "GrupoEdad": {
                     "type": "string"
                 },
@@ -162,6 +211,9 @@
         },
         "RIPS": {
             "properties": {
+                "Sexo": {
+                    "type": "string"
+                },
                 "CodigoDepartamento": {
                     "type": "string"
                 },
@@ -211,8 +263,52 @@
                 "TipoAtencion": {
                     "type": "string"
                 },
+                "PerteneceEtnia": {
+                    "type": "string"
+                },
+                "TieneDiscapacidad": {
+                    "type": "string"
+                },
+                "EsAdultoMayor": {
+                    "type": "string"
+                },
                 "Total": {
                     "type": "integer"
+                }
+            }
+        },
+        "RIPSUsoPromedio": {
+            "properties": {
+                "Categoria": {
+                    "type": "string"
+                },
+                "Subcategoria": {
+                    "type": "string"
+                },
+                "AnnoAtencion": {
+                    "type": "string"
+                },
+                "Promedio": {
+                    "type": "number"
+                },
+                "Error": {
+                    "type": "number"
+                }
+            }
+        },
+        "RIPSPromedioDeptos": {
+            "properties": {
+                "CodigoDepartamento": {
+                    "type": "string"
+                },
+                "Departamento": {
+                    "type": "string"
+                },
+                "Promedio": {
+                    "type": "number"
+                },
+                "PromedioAnno": {
+                    "type": "number"
                 }
             }
         },
