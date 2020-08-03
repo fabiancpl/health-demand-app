@@ -16,12 +16,12 @@ import json
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+from sklearn import preprocessing
 
-#Recall app
-from app import app
+#server
+from app import app_load
 
-
-def map(df,geojson):
+def map(df,geojson,df2,label2):
     #Create the map:
     Map_Fig=px.choropleth_mapbox(df,                           #Data
                 locations=df.columns[0],                       #Column containing the identifiers used in the GeoJSON file 
@@ -40,6 +40,19 @@ def map(df,geojson):
     Map_Fig.update_layout(title='Health in Colmbia',
     paper_bgcolor="#F8F9F9",
     margin={"r":0,"t":0,"l":0,"b":0} )
+    tmp_s = (df2.PromedioAnno-df2.PromedioAnno.min())/(df2.PromedioAnno.max()-df2.PromedioAnno.min())
+    Map_Fig.add_trace(
+    	go.Scattermapbox(
+        	lat=df2.Lon,
+	        lon=df2.Lat,
+        	mode='markers',
+        	marker=go.scattermapbox.Marker(
+            		size=10*tmp_s
+        	),
+        	text=df2.Departamento +" <br>"+label2 +df2.PromedioAnno.map(str),textposition = "bottom right"
+    	)
+    )
+
     return dcc.Graph(figure=Map_Fig,id="colombia_map") 
     #return html.P('Hola',id="colombia_map")  # delete and uncomment 
 
@@ -49,18 +62,18 @@ def build_gener(total, women, men):
                 className="gener",
                 children=[
                     dbc.Row(
-                        html.P("Total Base: "+ str(total)), id="row-titel-gener"
+                        html.P("Total Base: "+ str(total)), id="row-titel-gener",justify='center'
                     ),
                     dbc.Row([
                         dbc.Col(
-                        html.Img(id="woman-logo", src=app.get_asset_url("woman.png"))
+                        html.Img(id="woman-logo", src=app_load.get_asset_url("woman.png"))
                         ),
-                        dbc.Col(html.Img(id="man-logo", src=app.get_asset_url("man.png"))),
-                    ],id="row-gener-logo"),
+                        dbc.Col(html.Img(id="man-logo", src=app_load.get_asset_url("man.png"))),
+                    ],id="row-gener-logo",justify='center'),
                     dbc.Row([
                         dbc.Col([html.P(str(women)), ]),
 						dbc.Col([html.P(str(men)), ]),
-                    ],id="row-gener-values")
+                    ],id="row-gener-values",justify='center')
                                 
                 ]
             )
@@ -98,7 +111,7 @@ def generate_bar_h_chart(df):
 
 def generate_line_chart(df):
     return dcc.Graph(figure=px.line(df, x=df.columns[0], y=df.columns[2], color=df.columns[1]).update_layout(
-                            paper_bgcolor="#F8F9F9",
+                            #paper_bgcolor="#F8F9F9",
                             autosize=True,           
                             #margin={"r":0,"t":0,"l":0,"b":50},
                             showlegend=True,
@@ -109,7 +122,9 @@ def generate_line_chart(df):
                                     y=0.99,
                                     xanchor="left",
                                     x=0.01
-                                )
+                                ),
+                            paper_bgcolor = 'rgba(0,0,0,0)',
+                            plot_bgcolor = 'rgba(0,0,0,0)'
                             ).update_yaxes(automargin=True), id='Char_line')
 
 def generate_bar_chart(df,title):
@@ -119,21 +134,24 @@ def generate_bar_chart(df,title):
                 id='Colombia_bar',
             )
 
-def generate_violin_plot():
-    df = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/violin_data.csv")
+def generate_violin_plot(df,column):
     fig = go.Figure()
-    days = ['Thur', 'Fri', 'Sat', 'Sun']
-    for day in days:
-        fig.add_trace(go.Violin(x=df['day'][df['day'] == day],
-                                y=df['total_bill'][df['day'] == day],
-                                name=day,
+    values = df[column].unique()
+    for value in values:
+        fig.add_trace(go.Violin(x=df[column][df[column] == value],
+                                y=df['Total'][df[column] == value],
+                                name=value,
                                 box_visible=True,
                                 meanline_visible=True))
-    fig.update_layout(paper_bgcolor="#F8F9F9",
-                            title="Health Demand",
+    fig.update_layout(#paper_bgcolor="#F8F9F9",
+                            title=column,
+                            height=220,
+ 			    width=500,
                             autosize=True,           
                             margin={"r":0,"t":50,"l":0,"b":0},
-                            showlegend=False)
+                            showlegend=False,
+                            paper_bgcolor = 'rgba(0,0,0,0)',
+                            plot_bgcolor = 'rgba(0,0,0,0)').update_yaxes(automargin=True)
     return dcc.Graph(
                 figure=fig, id='violin_plot'
             )
@@ -142,11 +160,11 @@ def generate_Stacked_barchar(df,title):
     df_tmp = pd.pivot_table(df[df.GrupoEdad !=  'NA'], values='Total', index=['GrupoEdad'],columns=['Sexo'], aggfunc=np.sum).reset_index()
     df_tmp['Index']=pd.to_numeric(df_tmp.GrupoEdad.str.split(',',expand=True)[0].str.split('[',expand=True)[1])
     df_tmp.sort_values(by='Index',inplace=True)
-    layout = go.Layout( title = 'Victim people per age and sex',
-                       yaxis = go.layout.YAxis( title = 'Age group' ),
+    layout = go.Layout( title = 'Personas Victimas por Edad y Sexo',
+                       yaxis = go.layout.YAxis( title = 'Edad' ),
                        xaxis = go.layout.XAxis(
                            #range = [ -40000, 60000 ],
-                           title = 'Number of victim people'
+                           title = 'Número de Personas Victimas'
                        ),
                        barmode = 'overlay',
                        bargap = 0.1
@@ -155,7 +173,7 @@ def generate_Stacked_barchar(df,title):
     data = [ go.Bar( y = df_tmp[ 'GrupoEdad' ].astype( str ),
                     x = df_tmp['Masculino']*-1,
                     orientation = 'h',
-                    name = 'Men',
+                    name = 'Hombre',
                     text = df_tmp[ 'Masculino' ],
                     hoverinfo = 'text',
                     marker = dict( color = '#91b0ff' )
@@ -163,14 +181,15 @@ def generate_Stacked_barchar(df,title):
             go.Bar( y = df_tmp[ 'GrupoEdad' ].astype( str ),
                    x = df_tmp[ 'Femenino' ],
                    orientation = 'h',
-                   name ='Women',
+                   name ='Mujer',
                    text = df_tmp[ 'Femenino' ],
                    hoverinfo = 'text',
                    marker = dict( color = '#f23a87' )
                   ) 
            ]
 
-    fig = go.Figure( dict( data = data, layout = layout ) ).update_layout(paper_bgcolor="#F8F9F9",
+    fig = go.Figure( dict( data = data, layout = layout ) ).update_layout(paper_bgcolor = 'rgba(0,0,0,0)',
+                            						plot_bgcolor = 'rgba(0,0,0,0)',
                                                                         #width=530,
                                                                         height=320,
                                                                         autosize=True,
