@@ -149,6 +149,13 @@ def load_data():
     df_data_rips1.Total = pd.to_numeric(df_data_rips1.Total)
     df_data_rips2.Total = pd.to_numeric(df_data_rips2.Total)
     df_data_rips1.CodigoDepartamento = pd.to_numeric(df_data_rips1.CodigoDepartamento)
+    df_model['Enfermedad'] = np.where((df_model['Cerebro'] == '1'), 'Cerebro',  '')
+    df_model['Enfermedad'] = np.where((df_model['Diabetes'] == '1'), 'Diabetes',  df_model['Enfermedad'])
+    df_model['Enfermedad'] = np.where((df_model['hipertension'] == '1'), 'Hipertension',  df_model['Enfermedad'])
+    df_model['Enfermedad'] = np.where((df_model['Infarto'] == '1'), 'Infarto',  df_model['Enfermedad'])
+    df_model['Enfermedad'] = np.where((df_model['Mental'] == '1'), 'Mental',  df_model['Enfermedad'])
+    df_model['Enfermedad'] = np.where((df_model['Tumor'] == '1'), 'Tumor',  df_model['Enfermedad'])
+    
     end = time.time()
     print(end - start)
 
@@ -184,7 +191,7 @@ def build_tabs():
         children=[
             dcc.Tabs(
                 id="app-tabs",
-                value="tab3",
+                value="tab1",
                 className="custom-tabs",
                 children=[
                     dcc.Tab(
@@ -500,17 +507,11 @@ def build_center_column_tab3():
 
 
 def build_left_column_tab4():
-    return dbc.Col( #id="left-section-container-model",
+    return dbc.Col( 
                     children=[
-                        #dbc.Row(children=[
-								html.P(id='col-text'),
-                        		dbc.Row(html.Img(id="model_img_model2_2"), justify="center"),
-                        #],id='upper-left-section-container', justify="center"
-						#),
-                        #dbc.Row(children=[
-								dbc.Row(html.Img(id="model_img_model2_1")),
-                        #], id='lower-left-section-container', justify="center"
-						#),
+				html.P(id='col-text'),
+                        	dbc.Row(html.Img(id="model_img_model2_1"), justify="center"),
+				dbc.Row(html.Img(id="model_img_model2_2"), justify="center"),
                     ]
                 )
 
@@ -620,7 +621,7 @@ def update_output_tab2(value,value_dropdown,value_slider):
                                         total_men(tmp_df2)
                                     )
     etnia = def_graphic.generate_piechart('Etnias',get_Etnia(tmp_df2),'piechart3')
-    map = def_graphic.map(get_map_info(tmp_df1),geojson,get_over_map_info(df_lat_lon_col,df_promediodeptos),'Uso Promedio:')        
+    map = def_graphic.map(get_map_info(tmp_df1),geojson,get_over_map_info(df_lat_lon_col,df_promediodeptos),'Uso Promedio S. Salud:')        
     piramide = def_graphic.generate_line_chart(get_rips_Anno_Mes_TA(tmp_df1))
     #discapacidad = def_graphic.generate_treemap(get_TipoAtencion(tmp_df1))
 
@@ -651,7 +652,7 @@ def update_output_tab3(value):
     CicloVida = def_graphic.generate_violin_plot(tmp_df,'CicloVida')
     Etnia = def_graphic.generate_violin_plot(tmp_df,'Etnia')
     OrigenDiscapacidad = def_graphic.generate_violin_plot(tmp_df,'OrigenDiscapacidad')
-    Enfermedad = def_graphic.generate_violin_plot(tmp_df,'Diabetes')
+    Enfermedad = def_graphic.generate_violin_plot(tmp_df,'Enfermedad')
     if not value:	
         img = app_load.get_asset_url("m1_GeneralModel.png")
     elif value=='TieneDiscapacidad':
@@ -678,7 +679,7 @@ def update_output_tab4(value):
 		'infarto': 1.15,
 		'mental': 6.09,
 		'tumor': 2.1 }
-    text = "   Probabilidad de la Enfermedad: "+ value + "  "+str(tmp_dict.get(value)) + "%"
+    text = "   Pocentage de personas víctimas con la enfermedad: "+ value + "  "+str(tmp_dict.get(value)) + "%"
     img1 = app_load.get_asset_url("m2_mosaic-"+value+".png") 
     img2 = app_load.get_asset_url("m2_tree-"+value+".png")
 	

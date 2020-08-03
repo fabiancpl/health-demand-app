@@ -333,3 +333,6 @@ p {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+.tab--selected{
+  background-color: #323232 !important;
+  color: white !important;

@@ -40,13 +40,14 @@ def map(df,geojson,df2,label2):
     Map_Fig.update_layout(title='Health in Colmbia',
     paper_bgcolor="#F8F9F9",
     margin={"r":0,"t":0,"l":0,"b":0} )
+    tmp_s = (df2.PromedioAnno-df2.PromedioAnno.min())/(df2.PromedioAnno.max()-df2.PromedioAnno.min())
     Map_Fig.add_trace(
     	go.Scattermapbox(
         	lat=df2.Lon,
 	        lon=df2.Lat,
         	mode='markers',
         	marker=go.scattermapbox.Marker(
-            		size=10*preprocessing.normalize(df2.PromedioAnno)
+            		size=10*tmp_s
         	),
         	text=df2.Departamento +" <br>"+label2 +df2.PromedioAnno.map(str),textposition = "bottom right"
     	)
